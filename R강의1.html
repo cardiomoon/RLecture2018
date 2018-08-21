@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>R 언어 기초 - 데이터 다루기</title>
+    <meta charset="utf-8">
+    <meta name="author" content="문건웅" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# R 언어 기초 - 데이터 다루기
+### 문건웅
+### 2018/8/21
+
+---
+
+
+
+
+## 소개
+
+문건웅
+
+- 가톨릭대학교 의과대학 교수
+- 성빈센트병원 순환기내과 재직
+
+- R packages (CRAN)
+  - mycor, moonBook, ztable(2015)
+  - ggiraphExtra(2016) 
+  - dplyrAssist, editData, ggplotAssist(2017)
+
+- Books
+  - 의학논문 작성을 위한 R통계와 그래프(2015, 한나래) 
+      - 2015년 대한민국 학술원 우수학술도서
+  - 웹에서 클릭만으로 하는 R 통계분석(2015, 한나래) 
+  - Learn ggplot2 Using Shiny App(2017, Springer)
+
+- Web-R.org 운영
+
+---
+
+## 강의 자료 보기
+
+[https://github.com/cardiomoon/RLecture2018](https://github.com/cardiomoon/RLecture2018)
+
+
+---
+
+## R, Rstudio 설치하기
+
+
+R 설치하기
+
+* R-project [www.R-project.org](http://www.R-project.org)
+
+RStudio 설치하기
+
+* RStudio [www.rstudio.com](http://www.rstudio.com)
+
+Chrome 설치하기
+
+* 크롬다운로드 [https://www.google.co.kr/chrome/browser/desktop/](https://www.google.co.kr/chrome/browser/desktop/)
+
+---
+
+## RStudio server 접속하기
+
+
+[http://web-R.org:8787](http://web-R.org:8787)
+
+
+이름   | 아이디 |패스워드
+-------|--------|------------
+이규민 | index721| 4432\*\*\*\*
+박장희 | tigermagic| 4321\*\*\*\*
+이창준 | cjleecu | 7110\*\*\*\*
+이은혜 | happypuppy233| 2065\*\*\*\*
+안도현 | andoh94| 5515\*\*\*\*
+이아연 | onlyyoujmy | 9334\*\*\*\*
+송지수 | jssong1994 | 2998\*\*\*\*
+이효정 | abcd5644 | 7103\*\*\*\*
+김지홍 | jihongkim | 9128\*\*\*\*
+오현주 | mintnlemon | 4432\*\*\*\*
+
+---
+
+## 교재
+
+&lt;img src="figures/book1.jpg" width="25%" /&gt;&lt;img src="figures/book2.jpg" width="25%" /&gt;&lt;img src="figures/book3.jpg" width="25%" /&gt;&lt;img src="figures/book4.png" width="25%" /&gt;
+---
+
+##수업계획
+
+
+날짜      |     주제     
+----------|--------------------------
+2018/8/21 | R언어 기초 
+2018/8/28 | R을 이용한 의학통계(1)
+2018/9/4 | R을 이용한 의학통계(2)
+2108/9/11 | R을 이용한 그래프 그리기
+2018/9/18 | R을 이용한 repoducible research
+2018/10/2 | Project 발표 및 토론
+
+
+
+
+---
+
+## R에서 쓰는 표현식, 연산자
+
+
+```r
+r&lt;-2  
+circle &lt;- pi*r^2
+circle
+total&lt;-100; n&lt;-10
+average &lt;- total/n
+average
+5**2
+(1+2)*3
+```
+
+&lt;- 를 입력할 때는 Alt + - (맥에서는 Option + -) 를 누른다
+
+
+---
+
+## R에서 쓰는 표현식, 연산자
+
+
+```r
+r&lt;-2
+circle &lt;- pi*r^2
+circle
+```
+
+```
+[1] 12.56637
+```
+
+```r
+total&lt;-100; n&lt;-10
+average &lt;- total/n
+average
+```
+
+```
+[1] 10
+```
+
+```r
+5**2
+```
+
+```
+[1] 25
+```
+
+```r
+(1+2)*3
+```
+
+```
+[1] 9
+```
+
+
+---
+
+## R에서 모든 데이터는 벡터다
+
+변수에 데이타를 넣는 방법
+
+* 변수에 데이타 할당 ; =, &lt;-
+
+* combine 사용 
+
+* sequence 연산자 사용 (:)
+
+* sequence 함수 사용 (seq)
+
+* repeat함수 사용(rep) 
+
+---
+
+
+```r
+x=1
+y&lt;-2
+a=c(1,2,3)
+a
+a[2]
+b=1:10
+b[9]
+```
+
+---
+
+
+```r
+x=1
+y&lt;-2
+a=c(1,2,3)
+a
+```
+
+```
+[1] 1 2 3
+```
+
+```r
+a[2]
+```
+
+```
+[1] 2
+```
+
+```r
+b=1:10
+b[9]
+```
+
+```
+[1] 9
+```
+
+---
+
+
+```r
+f=rep(a,3);f
+(c=seq(5))
+(d=seq(1,3,0.25))
+(e=c(a,b))
+```
+
+
+---
+
+
+```r
+f=rep(a,3);f
+```
+
+```
+[1] 1 2 3 1 2 3 1 2 3
+```
+
+```r
+(c=seq(5))
+```
+
+```
+[1] 1 2 3 4 5
+```
+
+```r
+(d=seq(1,3,0.25))
+```
+
+```
+[1] 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00
+```
+
+```r
+(e=c(a,b))
+```
+
+```
+ [1]  1  2  3  1  2  3  4  5  6  7  8  9 10
+```
+
+
+---
+
+## 도움말 이용하기
+
+
+```r
+?seq
+```
+
+---
+
+## 기본데이터형
+
+
+* 숫자형(numeric)  12, 4, 0.45
+
+* 논리형(logical) TRUE, FALSE, T, F, 1, 0
+
+* 복소수형(complex) 3+2i
+
+* 문자형(character) "St.Vincent's Hospital","123",'3.14'
+
+
+---
+
+## 값의 할당,비교
+
+
+
+```r
+r=2
+r==2
+r=3
+r==2
+r!=2
+a=b=c=d=2
+a+b+c+d
+```
+
+---
+
+## 값의 할당,비교
+
+
+
+```r
+r=2 ; r==2
+```
+
+```
+[1] TRUE
+```
+
+```r
+r=3 ; r==2 ; r!=2
+```
+
+```
+[1] FALSE
+```
+
+```
+[1] TRUE
+```
+
+```r
+a=b=c=d=2 ; a+b+c+d
+```
+
+```
+[1] 8
+```
+
+---
+
+## 값의 계산
+
+평균의 계산
+
+```r
+total=2680;n=31
+```
+
+평균 average를 계산하시오.(단, 소수점 첫째자리에서 반올림 하시오)
+
+---
+
+## 값의 계산
+
+
+평균의 계산
+
+```r
+total=2680;n=31
+average=total/n
+average
+```
+
+```
+[1] 86.45161
+```
+
+```r
+round(average,1)
+```
+
+```
+[1] 86.5
+```
+
+
+
+---
+
+## 데이터 구조 
+
+* 벡터(vector)
+
+* 행렬(matrix)
+
+* 배열(array)
+
+* 데이타프레임(dataframe)
+
+* 리스트(list)
+
+* 범주형자료(categorical variable)
+
+* 시계열(Time series)
+
+---
+
+## 왜 벡터로 되어있을까?
+
+### 언제든지 자료를 추가할 수 있다.
+
+```r
+a=1:5
+a=c(a,101,102)
+b=c(a,103)
+b
+```
+
+---
+
+## 왜 벡터로 되어있을까?
+
+
+### 언제든지 자료를 추가할 수 있다.
+
+```r
+a=1:5
+a=c(a,101,102)
+b=c(a,103)
+b
+```
+
+```
+[1]   1   2   3   4   5 101 102 103
+```
+
+---
+
+###  자료의 연산이 아주 쉽다.
+
+BMI(body mass index) 계산을 어떻게 할까?
+
+
+```r
+Height=c(168,173,160,145,180)
+Weight=c(80,65,92,53,76)
+```
+
+
+---
+
+### 자료의 연산이 아주 쉽다.
+
+
+
+```r
+Height=c(168,173,160,145,180)
+Weight=c(80,65,92,53,76)
+BMI=Weight/(Height/100)^2
+BMI
+```
+
+```
+[1] 28.34467 21.71807 35.93750 25.20809 23.45679
+```
+
+---
+
+### 연산에서 벡터는 재사용된다
+
+
+
+```r
+a&lt;-1:10
+b&lt;-c(1,-1)
+a+b
+```
+
+* `\(b^2\)` `\(\pm\)` 4*a*c
+
+
+```r
+b&lt;-10
+a&lt;-c&lt;-2
+b^2+c(1,-1)*4*a*c
+```
+
+---
+
+### 연산에서 벡터는 재사용된다
+
+
+```r
+a&lt;-1:10
+b&lt;-c(1,-1)
+a+b
+```
+
+```
+ [1]  2  1  4  3  6  5  8  7 10  9
+```
+
+* `\(b^2\)` `\(\pm\)` 4*a*c
+
+
+```r
+b&lt;-10
+a&lt;-c&lt;-2
+b^2+c(1,-1)*4*a*c
+```
+
+```
+[1] 116  84
+```
+
+---
+
+## 행렬(matrix)이란 무엇인가 ?
+
+* 자료를 2차원으로 배열한 것
+* 수학의 행렬과 다른 점은 숫자 이외에도 가능하다는 것이다.
+
+
+```r
+a=matrix(1:12,ncol=3)
+a
+```
+
+```
+     [,1] [,2] [,3]
+[1,]    1    5    9
+[2,]    2    6   10
+[3,]    3    7   11
+[4,]    4    8   12
+```
+
+
+---
+
+
+```r
+(b=LETTERS[1:12])
+```
+
+```
+ [1] "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L"
+```
+
+```r
+(b=matrix(b,ncol=4,byrow=TRUE))
+```
+
+```
+     [,1] [,2] [,3] [,4]
+[1,] "A"  "B"  "C"  "D" 
+[2,] "E"  "F"  "G"  "H" 
+[3,] "I"  "J"  "K"  "L" 
+```
+
+---
+
+
+
+```r
+b
+```
+
+```
+     [,1] [,2] [,3] [,4]
+[1,] "A"  "B"  "C"  "D" 
+[2,] "E"  "F"  "G"  "H" 
+[3,] "I"  "J"  "K"  "L" 
+```
+
+```r
+b[3,2]
+b[2,4]
+b[2,] 
+b[,3]
+length(b), ncol(b), nrow(b)
+```
+---
+
+
+
+```r
+b[3,2]
+```
+
+```
+[1] "J"
+```
+
+```r
+b[2,4]
+```
+
+```
+[1] "H"
+```
+
+```r
+b[2,] 
+```
+
+```
+[1] "E" "F" "G" "H"
+```
+
+```r
+b[,3]
+```
+
+```
+[1] "C" "G" "K"
+```
+
+---
+
+
+
+```r
+length(b)
+```
+
+```
+[1] 12
+```
+
+```r
+ncol(b)
+```
+
+```
+[1] 4
+```
+
+```r
+nrow(b)
+```
+
+```
+[1] 3
+```
+
+---
+
+## apply()함수
+
+
+```r
+(a=matrix(1:12,ncol=3))
+```
+
+```
+     [,1] [,2] [,3]
+[1,]    1    5    9
+[2,]    2    6   10
+[3,]    3    7   11
+[4,]    4    8   12
+```
+
+```r
+apply(a,1,sum)
+apply(a,2,mean)
+rowSums(a)
+colMeans(a)
+```
+---
+
+
+
+```r
+apply(a,1,sum)
+```
+
+```
+[1] 15 18 21 24
+```
+
+```r
+apply(a,2,mean)
+```
+
+```
+[1]  2.5  6.5 10.5
+```
+
+```r
+rowSums(a)
+```
+
+```
+[1] 15 18 21 24
+```
+
+```r
+colMeans(a)
+```
+
+```
+[1]  2.5  6.5 10.5
+```
+
+---
+
+## 범주형자료(1) 성별
+
+
+
+```r
+sex=c("Male","Female","Female","Male","Male");(sex=factor(sex))
+```
+
+```
+[1] Male   Female Female Male   Male  
+Levels: Female Male
+```
+
+```r
+str(sex)
+```
+
+```
+ Factor w/ 2 levels "Female","Male": 2 1 1 2 2
+```
+
+```r
+levels(sex)
+```
+
+```
+[1] "Female" "Male"  
+```
+
+```r
+length(sex)
+```
+
+```
+[1] 5
+```
+
+---
+
+##  흡연 : "none","ex-smoker","smoker"
+
+
+
+```r
+smoking=c(1,1,2,3,1)
+smoking=factor(smoking)
+levels(smoking)=c("none","ex-smoker","smoker")
+smoking
+```
+
+```
+[1] none      none      ex-smoker smoker    none     
+Levels: none ex-smoker smoker
+```
+
+
+---
+
+## 배열 (array)
+
+
+* 행렬과 비슷하나 다차원구조를 가질수 있다.
+* 2차원 배열 = 행렬
+
+---
+
+##  데이타프레임(data.frame)
+
+
+* 우리가 다루는 거의 모든 자료는 데이타프레임이다.
+
+```r
+mydata=data.frame(height=Height,weight=Weight,
+                  sex=sex,smoking=smoking)
+```
+
+---
+
+## 데이타프레임의 일부 선택(subset)
+
+
+* 행렬과 비슷하다. 
+
+```r
+mydata
+```
+
+```
+  height weight    sex   smoking
+1    168     80   Male      none
+2    173     65 Female      none
+3    160     92 Female ex-smoker
+4    145     53   Male    smoker
+5    180     76   Male      none
+```
+
+
+```r
+mydata[3,]
+mydata[,1]
+mydata[3,2]
+```
+
+---
+
+## 데이타프레임의 일부 선택(subset)
+
+
+
+```r
+mydata[3,]
+```
+
+```
+  height weight    sex   smoking
+3    160     92 Female ex-smoker
+```
+
+```r
+mydata[,1]
+```
+
+```
+[1] 168 173 160 145 180
+```
+
+```r
+mydata[3,2]
+```
+
+```
+[1] 92
+```
+
+---
+
+## 데이타프레임의 열 선택
+
+
+* 데이타프레임의 열에 이름으로 접근할때는 *$*기호를 쓴다.
+
+```r
+mydata$height
+```
+
+```
+[1] 168 173 160 145 180
+```
+
+```r
+mydata[["height"]]
+```
+
+```
+[1] 168 173 160 145 180
+```
+
+
+---
+
+## 열의 순서로 접근
+
+
+```r
+mydata[1]   # 결과는 데이타 프레임
+```
+
+```
+  height
+1    168
+2    173
+3    160
+4    145
+5    180
+```
+
+```r
+mydata[[1]] # 결과는 벡터
+```
+
+```
+[1] 168 173 160 145 180
+```
+
+---
+
+## 새로운 열 추가
+
+```r
+mydata
+```
+
+```
+  height weight    sex   smoking
+1    168     80   Male      none
+2    173     65 Female      none
+3    160     92 Female ex-smoker
+4    145     53   Male    smoker
+5    180     76   Male      none
+```
+
+* BMI라는 열을 추가하고 싶다.
+
+
+---
+
+## 새로운 열 추가
+
+
+```r
+mydata$BMI=mydata$weight*10000/(mydata$height)^2
+mydata
+```
+
+```
+  height weight    sex   smoking      BMI
+1    168     80   Male      none 28.34467
+2    173     65 Female      none 21.71807
+3    160     92 Female ex-smoker 35.93750
+4    145     53   Male    smoker 25.20809
+5    180     76   Male      none 23.45679
+```
+
+
+---
+
+## 구조보기: str()
+
+
+```r
+str(mydata)
+```
+
+```
+'data.frame':	5 obs. of  5 variables:
+ $ height : num  168 173 160 145 180
+ $ weight : num  80 65 92 53 76
+ $ sex    : Factor w/ 2 levels "Female","Male": 2 1 1 2 2
+ $ smoking: Factor w/ 3 levels "none","ex-smoker",..: 1 1 2 3 1
+ $ BMI    : num  28.3 21.7 35.9 25.2 23.5
+```
+
+---
+
+## 요약: summary()
+
+
+```r
+summary(mydata)
+```
+
+```
+     height          weight         sex         smoking       BMI       
+ Min.   :145.0   Min.   :53.0   Female:2   none     :3   Min.   :21.72  
+ 1st Qu.:160.0   1st Qu.:65.0   Male  :3   ex-smoker:1   1st Qu.:23.46  
+ Median :168.0   Median :76.0              smoker   :1   Median :25.21  
+ Mean   :165.2   Mean   :73.2                            Mean   :26.93  
+ 3rd Qu.:173.0   3rd Qu.:80.0                            3rd Qu.:28.34  
+ Max.   :180.0   Max.   :92.0                            Max.   :35.94  
+```
+
+---
+
+## 실제 데이타로 실습
+
+
+```r
+mtcars
+head(mtcars,10)
+str(mtcars)
+summary(mtcars)
+mtcars$mpg
+stem(mtcars$mpg)
+hist(mtcars$mpg)
+boxplot(mtcars$mpg)
+fivenum(mtcars$mpg)
+quantile(mtcars$mpg)
+```
+
+---
+
+
+## swirl
+
+
+An interactive learning environment for R and statistics
+
+
+```r
+require(swirl)
+swirl()
+```
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
