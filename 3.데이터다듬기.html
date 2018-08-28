@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>데이터 다듬기</title>
+    <meta charset="utf-8">
+    <meta name="author" content="문 건 웅" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# 데이터 다듬기
+### 문 건 웅
+### 2017년 8월 26일
+
+---
+
+
+
+
+# 데이터 다듬기(Tidy Data)
+
+
+"Happy families are all alike; every unhappy family is unhappy in its own way." –– Leo Tolstoy
+
+
+--
+
+"Tidy datasets are all alike, but every messy dataset is messy in its own way." –– Hadley Wickham
+
+--
+
+![Data wrangling](http://r4ds.had.co.nz/diagrams/data-science-wrangle.png)
+
+---
+
+## Prerequisites
+
+
+```r
+#install.packages("tidyverse") 
+
+library(tidyverse)
+```
+
+```r
+table1
+```
+
+```
+# A tibble: 6 x 4
+  country      year  cases population
+  &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;
+1 Afghanistan  1999    745   19987071
+2 Afghanistan  2000   2666   20595360
+3 Brazil       1999  37737  172006362
+4 Brazil       2000  80488  174504898
+5 China        1999 212258 1272915272
+6 China        2000 213766 1280428583
+```
+---
+
+```r
+table2
+```
+
+```
+# A tibble: 12 x 4
+   country      year type            count
+   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;           &lt;int&gt;
+ 1 Afghanistan  1999 cases             745
+ 2 Afghanistan  1999 population   19987071
+ 3 Afghanistan  2000 cases            2666
+ 4 Afghanistan  2000 population   20595360
+ 5 Brazil       1999 cases           37737
+ 6 Brazil       1999 population  172006362
+ 7 Brazil       2000 cases           80488
+ 8 Brazil       2000 population  174504898
+ 9 China        1999 cases          212258
+10 China        1999 population 1272915272
+11 China        2000 cases          213766
+12 China        2000 population 1280428583
+```
+---
+
+
+```r
+table3
+```
+
+```
+# A tibble: 6 x 3
+  country      year rate             
+* &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;            
+1 Afghanistan  1999 745/19987071     
+2 Afghanistan  2000 2666/20595360    
+3 Brazil       1999 37737/172006362  
+4 Brazil       2000 80488/174504898  
+5 China        1999 212258/1272915272
+6 China        2000 213766/1280428583
+```
+---
+
+.pull-left[
+
+```r
+table4a # cases
+```
+
+```
+# A tibble: 3 x 3
+  country     `1999` `2000`
+* &lt;chr&gt;        &lt;int&gt;  &lt;int&gt;
+1 Afghanistan    745   2666
+2 Brazil       37737  80488
+3 China       212258 213766
+```
+]
+.pull-right[
+
+```r
+table4b # population
+```
+
+```
+# A tibble: 3 x 3
+  country         `1999`     `2000`
+* &lt;chr&gt;            &lt;int&gt;      &lt;int&gt;
+1 Afghanistan   19987071   20595360
+2 Brazil       172006362  174504898
+3 China       1272915272 1280428583
+```
+]
+---
+
+## Tidy data 란?  세 가지 규칙(Three rules)
+
+
+1. 각 변수는 고유한 열에 위치(Each variable must have its own column)
+
+2. 각 관찰치는 고유한 행에 위치(Each observation must have its own row)
+
+3. 각 수치는 고유한 cell에 위치(Each value must have its own cell)
+
+--
+![tidy data](http://r4ds.had.co.nz/images/tidy-1.png)
+
+---
+
+### Tidy data의 잇점
+
+1.일관성 있는 데이터의 구조
+
+2.변수가 열에 위치하고 있기 때문에 R의 장점인 벡터화된 연산이 가능하다.
+
+
+=&gt; 데이터 분석에 유용한 구조로 dplyr, ggplot2등 tidyverse 패키지들은 모두 tidy data에서 작동한다.
+
+--
+
+예 1) 인구 만 명당 유병률 
+
+```r
+table1 %&gt;%
+    mutate(rate = cases/population * 10000)
+```
+
+```
+# A tibble: 6 x 5
+  country      year  cases population  rate
+  &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt; &lt;dbl&gt;
+1 Afghanistan  1999    745   19987071 0.373
+2 Afghanistan  2000   2666   20595360 1.29 
+3 Brazil       1999  37737  172006362 2.19 
+4 Brazil       2000  80488  174504898 4.61 
+5 China        1999 212258 1272915272 1.67 
+6 China        2000 213766 1280428583 1.67 
+```
+
+
+---
+예 2) 년도별 환자수 총계
+
+
+```r
+table1 %&gt;%
+    count(year,wt=cases)
+```
+
+```
+# A tibble: 2 x 2
+   year      n
+  &lt;int&gt;  &lt;int&gt;
+1  1999 250740
+2  2000 296920
+```
+---
+예 3) 년도별 환자수 시각화 
+
+
+```r
+ggplot(table1,aes(year,cases,colour=country)) + 
+    geom_point() +
+    geom_line()
+```
+
+&lt;img src="3.데이터다듬기_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+---
+## Spreading 과 Gathering
+
+- 실제 접할 수 있는 대부분의 데이터는 tidy data가 아니다. 그 이유는 크게 두 가지인데 첫째, 대부분의 사람들은 tidy data의 개념이 없으며 둘째, 데이터는 종종 분석 이외에 다른 목적에 맞게 구조화되어 있기 때문이다. 어떤 데이터는 입력하기 쉬운 구조로 되어 있다.  
+
+- 깔끔한 데이타를 만들기 위한 첫번째 단계는 변수와 관측치를 구별하는 일이다. 두번째는 다음과 같은 흔한 문제를 해결하는 것이다.
+
+1. 한 변수가 여러 열에 분산되어 있는 경우
+
+2. 한 관측치가 여러행에 흩어져 있는 경우
+
+=&gt; spread()와 gather()로 해결할 수 있다.
+
+---
+
+### Gathering
+
+
+
+```r
+table4a
+```
+
+```
+# A tibble: 3 x 3
+  country     `1999` `2000`
+* &lt;chr&gt;        &lt;int&gt;  &lt;int&gt;
+1 Afghanistan    745   2666
+2 Brazil       37737  80488
+3 China       212258 213766
+```
+
+table4a의 1999와 2000은 변수의 이름이 아니고 year 변수의 값이고 각 행은 하나의 관측치가 아니라 두개의 관측치이다. 
+---
+
+![gathering](http://r4ds.had.co.nz/images/tidy-9.png)
+--
+
+```r
+table4a %&gt;%
+    gather(`1999`,`2000`,key="year",value="cases")
+```
+
+```
+# A tibble: 6 x 3
+  country     year   cases
+  &lt;chr&gt;       &lt;chr&gt;  &lt;int&gt;
+1 Afghanistan 1999     745
+2 Brazil      1999   37737
+3 China       1999  212258
+4 Afghanistan 2000    2666
+5 Brazil      2000   80488
+6 China       2000  213766
+```
+---
+
+```r
+table4b 
+```
+
+```
+# A tibble: 3 x 3
+  country         `1999`     `2000`
+* &lt;chr&gt;            &lt;int&gt;      &lt;int&gt;
+1 Afghanistan   19987071   20595360
+2 Brazil       172006362  174504898
+3 China       1272915272 1280428583
+```
+
+```r
+table4b %&gt;% 
+  gather(`1999`, `2000`, key = "year", value = "population")
+```
+
+```
+# A tibble: 6 x 3
+  country     year  population
+  &lt;chr&gt;       &lt;chr&gt;      &lt;int&gt;
+1 Afghanistan 1999    19987071
+2 Brazil      1999   172006362
+3 China       1999  1272915272
+4 Afghanistan 2000    20595360
+5 Brazil      2000   174504898
+6 China       2000  1280428583
+```
+---
+
+```r
+tidy4a &lt;- table4a %&gt;% 
+  gather(`1999`, `2000`, key = "year", value = "cases")
+tidy4b &lt;- table4b %&gt;% 
+  gather(`1999`, `2000`, key = "year", value = "population")
+left_join(tidy4a, tidy4b)
+```
+
+```
+# A tibble: 6 x 4
+  country     year   cases population
+  &lt;chr&gt;       &lt;chr&gt;  &lt;int&gt;      &lt;int&gt;
+1 Afghanistan 1999     745   19987071
+2 Brazil      1999   37737  172006362
+3 China       1999  212258 1272915272
+4 Afghanistan 2000    2666   20595360
+5 Brazil      2000   80488  174504898
+6 China       2000  213766 1280428583
+```
+---
+### Spreading
+
+
+```r
+table2
+```
+
+```
+# A tibble: 12 x 4
+   country      year type            count
+   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;           &lt;int&gt;
+ 1 Afghanistan  1999 cases             745
+ 2 Afghanistan  1999 population   19987071
+ 3 Afghanistan  2000 cases            2666
+ 4 Afghanistan  2000 population   20595360
+ 5 Brazil       1999 cases           37737
+ 6 Brazil       1999 population  172006362
+ 7 Brazil       2000 cases           80488
+ 8 Brazil       2000 population  174504898
+ 9 China        1999 cases          212258
+10 China        1999 population 1272915272
+11 China        2000 cases          213766
+12 China        2000 population 1280428583
+```
+
+table2에는 하나의 관측치가 두개의 행에 나누어져 있다. 하나의 관측치는 한 나라, 한 해의 데이터인데 각 관측치가 두 행에 나뉘어져 있다. 이 경우 spread()함수로 데이터를 깔끔한 데이터로 만들 수 있다.
+---
+![spreading](http://r4ds.had.co.nz/images/tidy-8.png)
+--
+
+```r
+table2 %&gt;% spread(key=type,value=count)
+```
+
+```
+# A tibble: 6 x 4
+  country      year  cases population
+  &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;
+1 Afghanistan  1999    745   19987071
+2 Afghanistan  2000   2666   20595360
+3 Brazil       1999  37737  172006362
+4 Brazil       2000  80488  174504898
+5 China        1999 212258 1272915272
+6 China        2000 213766 1280428583
+```
+
+---
+### Exercise
+
+다음 데이터를 깔끔하게 정리하라. spread 해야할까? gather해야할까? 
+
+```r
+preg &lt;- tribble(
+  ~pregnant, ~male, ~female,
+  "yes",     NA,    10,
+  "no",      20,    12
+)
+preg
+```
+
+```
+# A tibble: 2 x 3
+  pregnant  male female
+  &lt;chr&gt;    &lt;dbl&gt;  &lt;dbl&gt;
+1 yes         NA     10
+2 no          20     12
+```
+---
+
+### Answer
+
+
+```r
+preg %&gt;% gather(key="sex",value="n",male,female)
+```
+
+```
+# A tibble: 4 x 3
+  pregnant sex        n
+  &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt;
+1 yes      male      NA
+2 no       male      20
+3 yes      female    10
+4 no       female    12
+```
+
+---
+## Separating과 uniting
+
+### Separate
+
+
+```r
+table3
+```
+
+```
+# A tibble: 6 x 3
+  country      year rate             
+* &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;            
+1 Afghanistan  1999 745/19987071     
+2 Afghanistan  2000 2666/20595360    
+3 Brazil       1999 37737/172006362  
+4 Brazil       2000 80488/174504898  
+5 China        1999 212258/1272915272
+6 China        2000 213766/1280428583
+```
+
+table3에는 한 열(rate)에 두 개의 변수(cases와 population)가 포함되어 있다. 이 경우 separate()함수를 써서 분리할 수 있다.
+
+---
+![separating](http://r4ds.had.co.nz/images/tidy-17.png)
+---
+
+```r
+table3 %&gt;% 
+    separate(rate, into = c("cases", "population"))
+```
+
+```
+# A tibble: 6 x 4
+  country      year cases  population
+* &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;     
+1 Afghanistan  1999 745    19987071  
+2 Afghanistan  2000 2666   20595360  
+3 Brazil       1999 37737  172006362 
+4 Brazil       2000 80488  174504898 
+5 China        1999 212258 1272915272
+6 China        2000 213766 1280428583
+```
+
+---
+
+### separate()
+
+
+```r
+table3 %&gt;% 
+    separate(rate,into = c("cases", "population"),sep="/",convert=TRUE)
+```
+
+```
+# A tibble: 6 x 4
+  country      year  cases population
+* &lt;chr&gt;       &lt;int&gt;  &lt;int&gt;      &lt;int&gt;
+1 Afghanistan  1999    745   19987071
+2 Afghanistan  2000   2666   20595360
+3 Brazil       1999  37737  172006362
+4 Brazil       2000  80488  174504898
+5 China        1999 212258 1272915272
+6 China        2000 213766 1280428583
+```
+
+- 디폴트 값으로 sep는 알파벳 또는 숫자가 아닌 값으로 되어 있으며 sep인수로 지정할 수 있다.
+
+- 분리된 열의 데이터 타입은 현재의 데이터 타입으로 바뀌나 convert=TRUE로 지정해주면 가장 알맞는 데이터 타입으로 바뀐다.
+---
+- sep 인수에 숫자를 지정할 경우 분리할 위치로 해석한다. 양수는 문자의 왼쪽부터 시작하고 음수는 문자의 오른쪽에서 시작한다. 예를들어 연도를 century와 year로 분리하려면 다음과 같이 한다.
+
+
+```r
+table3 %&gt;% 
+  separate(year, into = c("century", "year"), sep = 2)
+```
+
+```
+# A tibble: 6 x 4
+  country     century year  rate             
+* &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;            
+1 Afghanistan 19      99    745/19987071     
+2 Afghanistan 20      00    2666/20595360    
+3 Brazil      19      99    37737/172006362  
+4 Brazil      20      00    80488/174504898  
+5 China       19      99    212258/1272915272
+6 China       20      00    213766/1280428583
+```
+---
+### unite
+
+unite()함수는 separate()함수의 반대이다.
+
+![unite](http://r4ds.had.co.nz/images/tidy-18.png)
+
+```
+unite(data,col,...,sep="_",remove=TRUE)
+```
+
+---
+
+```r
+table5
+```
+
+```
+# A tibble: 6 x 4
+  country     century year  rate             
+* &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;            
+1 Afghanistan 19      99    745/19987071     
+2 Afghanistan 20      00    2666/20595360    
+3 Brazil      19      99    37737/172006362  
+4 Brazil      20      00    80488/174504898  
+5 China       19      99    212258/1272915272
+6 China       20      00    213766/1280428583
+```
+
+```r
+table5 %&gt;% unite(new, century, year)
+```
+
+```
+# A tibble: 6 x 3
+  country     new   rate             
+  &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt;            
+1 Afghanistan 19_99 745/19987071     
+2 Afghanistan 20_00 2666/20595360    
+3 Brazil      19_99 37737/172006362  
+4 Brazil      20_00 80488/174504898  
+5 China       19_99 212258/1272915272
+6 China       20_00 213766/1280428583
+```
+---
+
+```r
+table5 %&gt;% 
+  unite(new, century, year,sep="")
+```
+
+```
+# A tibble: 6 x 3
+  country     new   rate             
+  &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt;            
+1 Afghanistan 1999  745/19987071     
+2 Afghanistan 2000  2666/20595360    
+3 Brazil      1999  37737/172006362  
+4 Brazil      2000  80488/174504898  
+5 China       1999  212258/1272915272
+6 China       2000  213766/1280428583
+```
+---
+### Exercises
+
+
+```r
+(tbl &lt;- tibble(x = c("a,b,c", "d,e,f,g", "h,i,j")) )
+```
+
+```
+# A tibble: 3 x 1
+  x      
+  &lt;chr&gt;  
+1 a,b,c  
+2 d,e,f,g
+3 h,i,j  
+```
+
+--
+
+```r
+?separate
+```
+
+separate(data, col, into, sep = "[^[:alnum:]]+", remove = TRUE,
+  convert = FALSE, **extra = "warn", fill = "warn",** ...)
+
+---
+
+```r
+tbl %&gt;% separate(x,c("one","two","three"))
+```
+
+```
+# A tibble: 3 x 3
+  one   two   three
+  &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+1 a     b     c    
+2 d     e     f    
+3 h     i     j    
+```
+
+```r
+tbl %&gt;% separate(x,c("one","two","three"),extra="merge")
+```
+
+```
+# A tibble: 3 x 3
+  one   two   three
+  &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+1 a     b     c    
+2 d     e     f,g  
+3 h     i     j    
+```
+---
+
+```r
+(tbl2 &lt;- tibble(x = c("a,b,c", "d,e", "f,g,i"))) 
+```
+
+```
+# A tibble: 3 x 1
+  x    
+  &lt;chr&gt;
+1 a,b,c
+2 d,e  
+3 f,g,i
+```
+---
+
+```r
+tbl2 %&gt;% separate(x, c("one", "two", "three"))
+```
+
+```
+# A tibble: 3 x 3
+  one   two   three
+  &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+1 a     b     c    
+2 d     e     &lt;NA&gt; 
+3 f     g     i    
+```
+
+```r
+tbl2 %&gt;% separate(x, c("one", "two", "three"),fill="left")
+```
+
+```
+# A tibble: 3 x 3
+  one   two   three
+  &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+1 a     b     c    
+2 &lt;NA&gt;  d     e    
+3 f     g     i    
+```
+---
+## Missing Values
+
+
+```r
+(stocks &lt;- tibble(
+  year   = c(2015, 2015, 2015, 2015, 2016, 2016, 2016),
+  qtr    = c(   1,    2,    3,    4,    2,    3,    4),
+  return = c(1.88, 0.59, 0.35,   NA, 0.92, 0.17, 2.66)
+))
+```
+
+```
+# A tibble: 7 x 3
+   year   qtr return
+  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+1  2015     1   1.88
+2  2015     2   0.59
+3  2015     3   0.35
+4  2015     4  NA   
+5  2016     2   0.92
+6  2016     3   0.17
+7  2016     4   2.66
+```
+
+--
+이 자료는 두 종류의 누락치가 있다.
+
+- 명시적인 누락: 2015년도 4분기 return이 누락되어 있다.
+
+- 암묵적인 누락: 2016년 1분기가 통째로 빠져있다. 
+
+
+
+---
+
+```r
+stocks %&gt;% 
+    spread(year,return)
+```
+
+```
+# A tibble: 4 x 3
+    qtr `2015` `2016`
+  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+1     1   1.88  NA   
+2     2   0.59   0.92
+3     3   0.35   0.17
+4     4  NA      2.66
+```
+--
+
+```r
+stocks %&gt;% 
+    spread(year,return) %&gt;%
+    gather(year,return,-qtr)
+```
+
+```
+# A tibble: 8 x 3
+    qtr year  return
+  &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
+1     1 2015    1.88
+2     2 2015    0.59
+3     3 2015    0.35
+4     4 2015   NA   
+5     1 2016   NA   
+6     2 2016    0.92
+7     3 2016    0.17
+8     4 2016    2.66
+```
+---
+
+```r
+stocks %&gt;% 
+    spread(year,return) %&gt;%
+    gather(year,return,-qtr,na.rm=TRUE)
+```
+
+```
+# A tibble: 6 x 3
+    qtr year  return
+* &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;
+1     1 2015    1.88
+2     2 2015    0.59
+3     3 2015    0.35
+4     2 2016    0.92
+5     3 2016    0.17
+6     4 2016    2.66
+```
+---
+
+```r
+stocks %&gt;%
+    complete(year,qtr)
+```
+
+```
+# A tibble: 8 x 3
+   year   qtr return
+  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+1  2015     1   1.88
+2  2015     2   0.59
+3  2015     3   0.35
+4  2015     4  NA   
+5  2016     1  NA   
+6  2016     2   0.92
+7  2016     3   0.17
+8  2016     4   2.66
+```
+
+complete() 함수는 열이름들을 받아들여 모든 가능한 조합을 만들어 누락치가 있으면 명시적으로 NA를 표시해준다.
+---
+
+#### fill()
+
+값의 중복을 피하기 위해 값이 바뀔 때만 기록한 자료가 있다.
+
+
+```r
+treatment &lt;- tribble(
+  ~ person,           ~ treatment, ~response,
+  "Derrick Whitmore", 1,           7,
+  NA,                 2,           10,
+  NA,                 3,           9,
+  "Katherine Burke",  1,           4
+)
+treatment
+```
+
+```
+# A tibble: 4 x 3
+  person           treatment response
+  &lt;chr&gt;                &lt;dbl&gt;    &lt;dbl&gt;
+1 Derrick Whitmore         1        7
+2 &lt;NA&gt;                     2       10
+3 &lt;NA&gt;                     3        9
+4 Katherine Burke          1        4
+```
+---
+
+```r
+treatment %&gt;%
+    fill(person)
+```
+
+```
+# A tibble: 4 x 3
+  person           treatment response
+  &lt;chr&gt;                &lt;dbl&gt;    &lt;dbl&gt;
+1 Derrick Whitmore         1        7
+2 Derrick Whitmore         2       10
+3 Derrick Whitmore         3        9
+4 Katherine Burke          1        4
+```
+--
+
+```r
+treatment %&gt;%
+    fill(person,.direction="up")
+```
+
+```
+# A tibble: 4 x 3
+  person           treatment response
+  &lt;chr&gt;                &lt;dbl&gt;    &lt;dbl&gt;
+1 Derrick Whitmore         1        7
+2 Katherine Burke          2       10
+3 Katherine Burke          3        9
+4 Katherine Burke          1        4
+```
+
+---
+## Case Study
+
+
+```r
+who
+```
+
+```
+# A tibble: 7,240 x 60
+   country iso2  iso3   year new_sp_m014 new_sp_m1524 new_sp_m2534
+   &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt; &lt;int&gt;       &lt;int&gt;        &lt;int&gt;        &lt;int&gt;
+ 1 Afghan… AF    AFG    1980          NA           NA           NA
+ 2 Afghan… AF    AFG    1981          NA           NA           NA
+ 3 Afghan… AF    AFG    1982          NA           NA           NA
+ 4 Afghan… AF    AFG    1983          NA           NA           NA
+ 5 Afghan… AF    AFG    1984          NA           NA           NA
+ 6 Afghan… AF    AFG    1985          NA           NA           NA
+ 7 Afghan… AF    AFG    1986          NA           NA           NA
+ 8 Afghan… AF    AFG    1987          NA           NA           NA
+ 9 Afghan… AF    AFG    1988          NA           NA           NA
+10 Afghan… AF    AFG    1989          NA           NA           NA
+# ... with 7,230 more rows, and 53 more variables: new_sp_m3544 &lt;int&gt;,
+#   new_sp_m4554 &lt;int&gt;, new_sp_m5564 &lt;int&gt;, new_sp_m65 &lt;int&gt;,
+#   new_sp_f014 &lt;int&gt;, new_sp_f1524 &lt;int&gt;, new_sp_f2534 &lt;int&gt;,
+#   new_sp_f3544 &lt;int&gt;, new_sp_f4554 &lt;int&gt;, new_sp_f5564 &lt;int&gt;,
+#   new_sp_f65 &lt;int&gt;, new_sn_m014 &lt;int&gt;, new_sn_m1524 &lt;int&gt;,
+#   new_sn_m2534 &lt;int&gt;, new_sn_m3544 &lt;int&gt;, new_sn_m4554 &lt;int&gt;,
+#   new_sn_m5564 &lt;int&gt;, new_sn_m65 &lt;int&gt;, new_sn_f014 &lt;int&gt;,
+#   new_sn_f1524 &lt;int&gt;, new_sn_f2534 &lt;int&gt;, new_sn_f3544 &lt;int&gt;,
+#   new_sn_f4554 &lt;int&gt;, new_sn_f5564 &lt;int&gt;, new_sn_f65 &lt;int&gt;,
+#   new_ep_m014 &lt;int&gt;, new_ep_m1524 &lt;int&gt;, new_ep_m2534 &lt;int&gt;,
+#   new_ep_m3544 &lt;int&gt;, new_ep_m4554 &lt;int&gt;, new_ep_m5564 &lt;int&gt;,
+#   new_ep_m65 &lt;int&gt;, new_ep_f014 &lt;int&gt;, new_ep_f1524 &lt;int&gt;,
+#   new_ep_f2534 &lt;int&gt;, new_ep_f3544 &lt;int&gt;, new_ep_f4554 &lt;int&gt;,
+#   new_ep_f5564 &lt;int&gt;, new_ep_f65 &lt;int&gt;, newrel_m014 &lt;int&gt;,
+#   newrel_m1524 &lt;int&gt;, newrel_m2534 &lt;int&gt;, newrel_m3544 &lt;int&gt;,
+#   newrel_m4554 &lt;int&gt;, newrel_m5564 &lt;int&gt;, newrel_m65 &lt;int&gt;,
+#   newrel_f014 &lt;int&gt;, newrel_f1524 &lt;int&gt;, newrel_f2534 &lt;int&gt;,
+#   newrel_f3544 &lt;int&gt;, newrel_f4554 &lt;int&gt;, newrel_f5564 &lt;int&gt;,
+#   newrel_f65 &lt;int&gt;
+```
+---
+
+```r
+who1 &lt;- who %&gt;% 
+    gather(5:60,key="key",value="cases",na.rm=TRUE)
+who1
+```
+
+```
+# A tibble: 76,046 x 6
+   country     iso2  iso3   year key         cases
+ * &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;chr&gt;       &lt;int&gt;
+ 1 Afghanistan AF    AFG    1997 new_sp_m014     0
+ 2 Afghanistan AF    AFG    1998 new_sp_m014    30
+ 3 Afghanistan AF    AFG    1999 new_sp_m014     8
+ 4 Afghanistan AF    AFG    2000 new_sp_m014    52
+ 5 Afghanistan AF    AFG    2001 new_sp_m014   129
+ 6 Afghanistan AF    AFG    2002 new_sp_m014    90
+ 7 Afghanistan AF    AFG    2003 new_sp_m014   127
+ 8 Afghanistan AF    AFG    2004 new_sp_m014   139
+ 9 Afghanistan AF    AFG    2005 new_sp_m014   151
+10 Afghanistan AF    AFG    2006 new_sp_m014   193
+# ... with 76,036 more rows
+```
+---
+
+```r
+?who
+unique(who1$key)
+```
+
+```
+ [1] "new_sp_m014"  "new_sp_m1524" "new_sp_m2534" "new_sp_m3544"
+ [5] "new_sp_m4554" "new_sp_m5564" "new_sp_m65"   "new_sp_f014" 
+ [9] "new_sp_f1524" "new_sp_f2534" "new_sp_f3544" "new_sp_f4554"
+[13] "new_sp_f5564" "new_sp_f65"   "new_sn_m014"  "new_sn_m1524"
+[17] "new_sn_m2534" "new_sn_m3544" "new_sn_m4554" "new_sn_m5564"
+[21] "new_sn_m65"   "new_sn_f014"  "new_sn_f1524" "new_sn_f2534"
+[25] "new_sn_f3544" "new_sn_f4554" "new_sn_f5564" "new_sn_f65"  
+[29] "new_ep_m014"  "new_ep_m1524" "new_ep_m2534" "new_ep_m3544"
+[33] "new_ep_m4554" "new_ep_m5564" "new_ep_m65"   "new_ep_f014" 
+[37] "new_ep_f1524" "new_ep_f2534" "new_ep_f3544" "new_ep_f4554"
+[41] "new_ep_f5564" "new_ep_f65"   "newrel_m014"  "newrel_m1524"
+[45] "newrel_m2534" "newrel_m3544" "newrel_m4554" "newrel_m5564"
+[49] "newrel_m65"   "newrel_f014"  "newrel_f1524" "newrel_f2534"
+[53] "newrel_f3544" "newrel_f4554" "newrel_f5564" "newrel_f65"  
+```
+---
+
+```r
+who2 &lt;- who1 %&gt;%
+    mutate(key=stringr::str_replace(key,"newrel","new_rel"))
+unique(who2$key)
+```
+
+```
+ [1] "new_sp_m014"   "new_sp_m1524"  "new_sp_m2534"  "new_sp_m3544" 
+ [5] "new_sp_m4554"  "new_sp_m5564"  "new_sp_m65"    "new_sp_f014"  
+ [9] "new_sp_f1524"  "new_sp_f2534"  "new_sp_f3544"  "new_sp_f4554" 
+[13] "new_sp_f5564"  "new_sp_f65"    "new_sn_m014"   "new_sn_m1524" 
+[17] "new_sn_m2534"  "new_sn_m3544"  "new_sn_m4554"  "new_sn_m5564" 
+[21] "new_sn_m65"    "new_sn_f014"   "new_sn_f1524"  "new_sn_f2534" 
+[25] "new_sn_f3544"  "new_sn_f4554"  "new_sn_f5564"  "new_sn_f65"   
+[29] "new_ep_m014"   "new_ep_m1524"  "new_ep_m2534"  "new_ep_m3544" 
+[33] "new_ep_m4554"  "new_ep_m5564"  "new_ep_m65"    "new_ep_f014"  
+[37] "new_ep_f1524"  "new_ep_f2534"  "new_ep_f3544"  "new_ep_f4554" 
+[41] "new_ep_f5564"  "new_ep_f65"    "new_rel_m014"  "new_rel_m1524"
+[45] "new_rel_m2534" "new_rel_m3544" "new_rel_m4554" "new_rel_m5564"
+[49] "new_rel_m65"   "new_rel_f014"  "new_rel_f1524" "new_rel_f2534"
+[53] "new_rel_f3544" "new_rel_f4554" "new_rel_f5564" "new_rel_f65"  
+```
+---
+
+```r
+who3 &lt;- who2 %&gt;% 
+    separate(key,c("new","type","sexage"))
+who3
+```
+
+```
+# A tibble: 76,046 x 8
+   country     iso2  iso3   year new   type  sexage cases
+   &lt;chr&gt;       &lt;chr&gt; &lt;chr&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;  &lt;int&gt;
+ 1 Afghanistan AF    AFG    1997 new   sp    m014       0
+ 2 Afghanistan AF    AFG    1998 new   sp    m014      30
+ 3 Afghanistan AF    AFG    1999 new   sp    m014       8
+ 4 Afghanistan AF    AFG    2000 new   sp    m014      52
+ 5 Afghanistan AF    AFG    2001 new   sp    m014     129
+ 6 Afghanistan AF    AFG    2002 new   sp    m014      90
+ 7 Afghanistan AF    AFG    2003 new   sp    m014     127
+ 8 Afghanistan AF    AFG    2004 new   sp    m014     139
+ 9 Afghanistan AF    AFG    2005 new   sp    m014     151
+10 Afghanistan AF    AFG    2006 new   sp    m014     193
+# ... with 76,036 more rows
+```
+---
+
+
+```r
+who3 %&gt;% count(new)
+```
+
+```
+# A tibble: 1 x 2
+  new       n
+  &lt;chr&gt; &lt;int&gt;
+1 new   76046
+```
+
+```r
+who4 &lt;- who3 %&gt;%
+    select(-new, -iso2, -iso3)
+```
+---
+
+```r
+who5 &lt;- who4 %&gt;% 
+  separate(sexage, c("sex", "age"), sep = 1)
+
+who5
+```
+
+```
+# A tibble: 76,046 x 6
+   country      year type  sex   age   cases
+   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt;
+ 1 Afghanistan  1997 sp    m     014       0
+ 2 Afghanistan  1998 sp    m     014      30
+ 3 Afghanistan  1999 sp    m     014       8
+ 4 Afghanistan  2000 sp    m     014      52
+ 5 Afghanistan  2001 sp    m     014     129
+ 6 Afghanistan  2002 sp    m     014      90
+ 7 Afghanistan  2003 sp    m     014     127
+ 8 Afghanistan  2004 sp    m     014     139
+ 9 Afghanistan  2005 sp    m     014     151
+10 Afghanistan  2006 sp    m     014     193
+# ... with 76,036 more rows
+```
+---
+
+```r
+who5 &lt;-who %&gt;%
+  gather(code, value, new_sp_m014:newrel_f65, na.rm = TRUE) %&gt;% 
+  mutate(code = stringr::str_replace(code, "newrel", "new_rel")) %&gt;%
+  separate(code, c("new", "var", "sexage")) %&gt;% 
+  select(-new, -iso2, -iso3) %&gt;% 
+  separate(sexage, c("sex", "age"), sep = 1)
+who5
+```
+
+```
+# A tibble: 76,046 x 6
+   country      year var   sex   age   value
+   &lt;chr&gt;       &lt;int&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;int&gt;
+ 1 Afghanistan  1997 sp    m     014       0
+ 2 Afghanistan  1998 sp    m     014      30
+ 3 Afghanistan  1999 sp    m     014       8
+ 4 Afghanistan  2000 sp    m     014      52
+ 5 Afghanistan  2001 sp    m     014     129
+ 6 Afghanistan  2002 sp    m     014      90
+ 7 Afghanistan  2003 sp    m     014     127
+ 8 Afghanistan  2004 sp    m     014     139
+ 9 Afghanistan  2005 sp    m     014     151
+10 Afghanistan  2006 sp    m     014     193
+# ... with 76,036 more rows
+```
+---
+### Exercises
+
+각 나이, 성별로 결핵 환자 전체 수를 구하라
+
+
+```r
+who5 %&gt;% 
+    group_by(sex,age) %&gt;%
+    summarise(total=sum(value)) %&gt;%
+    ggplot(aes(age,total,fill=sex)) + geom_col()
+```
+
+&lt;img src="3.데이터다듬기_files/figure-html/unnamed-chunk-45-1.png" style="display: block; margin: auto;" /&gt;
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

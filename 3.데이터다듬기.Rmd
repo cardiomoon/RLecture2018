@@ -1,0 +1,420 @@
+---
+title: "데이터 다듬기"
+author: "문 건 웅"
+date: "2017년 8월 26일"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(echo = TRUE,comment=NA, message=FALSE, warning=FALSE,
+                      fig.asp=0.618, fig.align="center")
+```
+
+# 데이터 다듬기(Tidy Data)
+
+
+"Happy families are all alike; every unhappy family is unhappy in its own way." –– Leo Tolstoy
+
+
+--
+
+"Tidy datasets are all alike, but every messy dataset is messy in its own way." –– Hadley Wickham
+
+--
+
+![Data wrangling](http://r4ds.had.co.nz/diagrams/data-science-wrangle.png)
+
+---
+
+## Prerequisites
+
+```{r}
+#install.packages("tidyverse") 
+
+library(tidyverse)
+```
+```{r}
+table1
+```
+---
+```{r}
+table2
+```
+---
+
+```{r}
+table3
+```
+---
+
+.pull-left[
+```{r}
+table4a # cases
+```
+]
+.pull-right[
+```{r}
+table4b # population
+```
+]
+---
+
+## Tidy data 란?  세 가지 규칙(Three rules)
+
+
+1. 각 변수는 고유한 열에 위치(Each variable must have its own column)
+
+2. 각 관찰치는 고유한 행에 위치(Each observation must have its own row)
+
+3. 각 수치는 고유한 cell에 위치(Each value must have its own cell)
+
+--
+![tidy data](http://r4ds.had.co.nz/images/tidy-1.png)
+
+---
+
+### Tidy data의 잇점
+
+1.일관성 있는 데이터의 구조
+
+2.변수가 열에 위치하고 있기 때문에 R의 장점인 벡터화된 연산이 가능하다.
+
+
+=> 데이터 분석에 유용한 구조로 dplyr, ggplot2등 tidyverse 패키지들은 모두 tidy data에서 작동한다.
+
+--
+
+예 1) 인구 만 명당 유병률 
+```{r}
+table1 %>%
+    mutate(rate = cases/population * 10000)
+```
+
+
+---
+예 2) 년도별 환자수 총계
+
+```{r}
+table1 %>%
+    count(year,wt=cases)
+```
+---
+예 3) 년도별 환자수 시각화 
+
+```{r,fig.height=5}
+ggplot(table1,aes(year,cases,colour=country)) + 
+    geom_point() +
+    geom_line()
+```
+---
+## Spreading 과 Gathering
+
+- 실제 접할 수 있는 대부분의 데이터는 tidy data가 아니다. 그 이유는 크게 두 가지인데 첫째, 대부분의 사람들은 tidy data의 개념이 없으며 둘째, 데이터는 종종 분석 이외에 다른 목적에 맞게 구조화되어 있기 때문이다. 어떤 데이터는 입력하기 쉬운 구조로 되어 있다.  
+
+- 깔끔한 데이타를 만들기 위한 첫번째 단계는 변수와 관측치를 구별하는 일이다. 두번째는 다음과 같은 흔한 문제를 해결하는 것이다.
+
+1. 한 변수가 여러 열에 분산되어 있는 경우
+
+2. 한 관측치가 여러행에 흩어져 있는 경우
+
+=> spread()와 gather()로 해결할 수 있다.
+
+---
+
+### Gathering
+
+
+```{r}
+table4a
+```
+
+table4a의 1999와 2000은 변수의 이름이 아니고 year 변수의 값이고 각 행은 하나의 관측치가 아니라 두개의 관측치이다. 
+---
+
+![gathering](http://r4ds.had.co.nz/images/tidy-9.png)
+--
+```{r}
+table4a %>%
+    gather(`1999`,`2000`,key="year",value="cases")
+```
+---
+```{r}
+table4b 
+table4b %>% 
+  gather(`1999`, `2000`, key = "year", value = "population")
+```
+---
+```{r}
+tidy4a <- table4a %>% 
+  gather(`1999`, `2000`, key = "year", value = "cases")
+tidy4b <- table4b %>% 
+  gather(`1999`, `2000`, key = "year", value = "population")
+left_join(tidy4a, tidy4b)
+```
+---
+### Spreading
+
+```{r}
+table2
+```
+
+table2에는 하나의 관측치가 두개의 행에 나누어져 있다. 하나의 관측치는 한 나라, 한 해의 데이터인데 각 관측치가 두 행에 나뉘어져 있다. 이 경우 spread()함수로 데이터를 깔끔한 데이터로 만들 수 있다.
+---
+![spreading](http://r4ds.had.co.nz/images/tidy-8.png)
+--
+```{r}
+table2 %>% spread(key=type,value=count)
+```
+
+---
+### Exercise
+
+다음 데이터를 깔끔하게 정리하라. spread 해야할까? gather해야할까? 
+```{r}
+preg <- tribble(
+  ~pregnant, ~male, ~female,
+  "yes",     NA,    10,
+  "no",      20,    12
+)
+preg
+```
+---
+
+### Answer
+
+```{r}
+preg %>% gather(key="sex",value="n",male,female)
+```        
+
+---
+## Separating과 uniting
+
+### Separate
+
+```{r}
+table3
+```
+
+table3에는 한 열(rate)에 두 개의 변수(cases와 population)가 포함되어 있다. 이 경우 separate()함수를 써서 분리할 수 있다.
+
+---
+![separating](http://r4ds.had.co.nz/images/tidy-17.png)
+---
+```{r}
+table3 %>% 
+    separate(rate, into = c("cases", "population"))
+```
+
+---
+
+### separate()
+
+```{r}
+table3 %>% 
+    separate(rate,into = c("cases", "population"),sep="/",convert=TRUE)
+```
+
+- 디폴트 값으로 sep는 알파벳 또는 숫자가 아닌 값으로 되어 있으며 sep인수로 지정할 수 있다.
+
+- 분리된 열의 데이터 타입은 현재의 데이터 타입으로 바뀌나 convert=TRUE로 지정해주면 가장 알맞는 데이터 타입으로 바뀐다.
+---
+- sep 인수에 숫자를 지정할 경우 분리할 위치로 해석한다. 양수는 문자의 왼쪽부터 시작하고 음수는 문자의 오른쪽에서 시작한다. 예를들어 연도를 century와 year로 분리하려면 다음과 같이 한다.
+
+```{r}
+table3 %>% 
+  separate(year, into = c("century", "year"), sep = 2)
+```
+---
+### unite
+
+unite()함수는 separate()함수의 반대이다.
+
+![unite](http://r4ds.had.co.nz/images/tidy-18.png)
+
+```
+unite(data,col,...,sep="_",remove=TRUE)
+```
+
+---
+```{r}
+table5
+table5 %>% unite(new, century, year)
+```
+---
+```{r}
+table5 %>% 
+  unite(new, century, year,sep="")
+```
+---
+### Exercises
+
+```{r}
+(tbl <- tibble(x = c("a,b,c", "d,e,f,g", "h,i,j")) )
+```
+
+--
+```{r}
+?separate
+```
+
+separate(data, col, into, sep = "[^[:alnum:]]+", remove = TRUE,
+  convert = FALSE, **extra = "warn", fill = "warn",** ...)
+
+---
+```{r}
+tbl %>% separate(x,c("one","two","three"))
+tbl %>% separate(x,c("one","two","three"),extra="merge")
+```
+---
+```{r}
+(tbl2 <- tibble(x = c("a,b,c", "d,e", "f,g,i"))) 
+```
+---
+```{r}
+tbl2 %>% separate(x, c("one", "two", "three"))
+tbl2 %>% separate(x, c("one", "two", "three"),fill="left")
+```
+---
+## Missing Values
+
+```{r}
+(stocks <- tibble(
+  year   = c(2015, 2015, 2015, 2015, 2016, 2016, 2016),
+  qtr    = c(   1,    2,    3,    4,    2,    3,    4),
+  return = c(1.88, 0.59, 0.35,   NA, 0.92, 0.17, 2.66)
+))
+```
+
+--
+이 자료는 두 종류의 누락치가 있다.
+
+- 명시적인 누락: 2015년도 4분기 return이 누락되어 있다.
+
+- 암묵적인 누락: 2016년 1분기가 통째로 빠져있다. 
+
+
+
+---
+```{r}
+stocks %>% 
+    spread(year,return)
+```
+--
+```{r}
+stocks %>% 
+    spread(year,return) %>%
+    gather(year,return,-qtr)
+```
+---
+```{r}
+stocks %>% 
+    spread(year,return) %>%
+    gather(year,return,-qtr,na.rm=TRUE)
+```
+---
+```{r}
+stocks %>%
+    complete(year,qtr)
+```
+
+complete() 함수는 열이름들을 받아들여 모든 가능한 조합을 만들어 누락치가 있으면 명시적으로 NA를 표시해준다.
+---
+
+#### fill()
+
+값의 중복을 피하기 위해 값이 바뀔 때만 기록한 자료가 있다.
+
+```{r}
+treatment <- tribble(
+  ~ person,           ~ treatment, ~response,
+  "Derrick Whitmore", 1,           7,
+  NA,                 2,           10,
+  NA,                 3,           9,
+  "Katherine Burke",  1,           4
+)
+treatment
+```
+---
+```{r}
+treatment %>%
+    fill(person)
+```
+--
+```{r}
+treatment %>%
+    fill(person,.direction="up")
+```
+
+---
+## Case Study
+
+```{r}
+who
+```
+---
+```{r}
+who1 <- who %>% 
+    gather(5:60,key="key",value="cases",na.rm=TRUE)
+who1
+```
+---
+```{r}
+?who
+unique(who1$key)
+```
+---
+```{r}
+who2 <- who1 %>%
+    mutate(key=stringr::str_replace(key,"newrel","new_rel"))
+unique(who2$key)
+```
+---
+```{r}
+who3 <- who2 %>% 
+    separate(key,c("new","type","sexage"))
+who3
+```
+---
+
+```{r}
+who3 %>% count(new)
+
+who4 <- who3 %>%
+    select(-new, -iso2, -iso3)
+```
+---
+```{r}
+who5 <- who4 %>% 
+  separate(sexage, c("sex", "age"), sep = 1)
+
+who5
+```
+---
+```{r}
+who5 <-who %>%
+  gather(code, value, new_sp_m014:newrel_f65, na.rm = TRUE) %>% 
+  mutate(code = stringr::str_replace(code, "newrel", "new_rel")) %>%
+  separate(code, c("new", "var", "sexage")) %>% 
+  select(-new, -iso2, -iso3) %>% 
+  separate(sexage, c("sex", "age"), sep = 1)
+who5
+```
+---
+### Exercises
+
+각 나이, 성별로 결핵 환자 전체 수를 구하라
+
+```{r}
+who5 %>% 
+    group_by(sex,age) %>%
+    summarise(total=sum(value)) %>%
+    ggplot(aes(age,total,fill=sex)) + geom_col()
+
+```

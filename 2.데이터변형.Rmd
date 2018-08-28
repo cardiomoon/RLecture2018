@@ -1,0 +1,1049 @@
+---
+title: "데이터 변형"
+author: "문 건 웅"
+date: "2017년 8월 26일"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(echo = TRUE,comment=NA, message=FALSE, warning=FALSE,
+                      fig.asp=0.618, fig.align="center")
+```
+
+# 데이터 변형
+
+
+![Data wrangling](http://r4ds.had.co.nz/diagrams/data-science-wrangle.png)
+
+---
+
+## Prerequisites
+
+```{r}
+#install.packages("tidyverse") 
+
+library(tidyverse)
+library(nycflights13)
+```
+
+---
+
+## Tibbles
+
+Tibble은 데이터프레임을 개선시킨 데이터구조이다.
+
+```{r}
+iris
+```
+
+---
+
+```{r}
+iris1=as_tibble(iris)
+iris1
+```
+
+---
+
+## 데이터 변형
+
+- 예제소개
+
+- 조건에 맞는 관찰치 찾기 `filter()`
+
+- 정렬하기 `arrange()`
+
+- 원하는 변수만 고르기 `select()`
+
+- 새로운 변수를 추가 `mutate()`
+
+- 그룹별로 요약하기 `summarise()`
+
+- 그룹별 변수추가(및 데이터 필터링)
+
+---
+
+### 데이터 소개
+
+- *flights* : 2013년에 뉴욕시에서 출발한 모든 비행기록(336,776 flights)
+
+```{r}
+flights
+```
+
+---
+
+#### 출력하기
+
+```{r}
+print(flights,n=10,width=Inf)
+```
+
+---
+
+#### 변수의 종류
+
+- `int` 정수
+
+- `dbl` 실수
+
+- `chr` 문자형
+
+- `dttm` 날짜-시간(날짜+시간)
+
+- `lgl` 논리형 - `TRUE` or `FALSE`
+
+- `fctr` 팩터형. 고정된 값을 갖는 범주형 변수
+
+- `date` 날짜
+
+---
+
+#### dplyr의 다섯가지의 키 함수
+
+
+- 조건에 맞는 관찰치 찾기: `filter()`
+
+- 정렬하기: `arrange()`
+
+- 원하는 변수만 고르기: `select()`
+
+- 새로운 변수를 추가하기: `mutate()`
+
+- 하나의 변수로 요약하기: `summarise()`
+
+--
+
+#### One more thing
+
+- 모든 함수를 그룹별로 적용하기 `group_by()`
+
+---
+
+### 사용하기
+
+모든 함수의 사용법은 유사하다:
+
+1. 첫번째 인수는 데이터프레임이다.
+
+2. 두번째 이후의 인수는 그 데이터프레임으로 무엇을 할 것인지 기술한다.(변수이름 사용) 
+
+3. 결과는 새로운 데이터프레임이다.
+
+---
+
+#### 외워봅시다: dplyr의 키 함수 
+
+
+- 조건에 맞는 관찰치 찾기:
+--
+: `filter()`
+
+- 정렬하기: 
+--
+`arrange()`
+
+- 원하는 변수만 고르기: 
+--
+`select()`
+
+- 새로운 변수를 추가하기: 
+--
+`mutate()`
+
+- 하나의 변수로 요약하기: 
+--
+`summarise()`
+
+- 그룹별로 함수 적용: 
+--
+`group_by()`
+
+
+---
+
+### Filter rows with filter()
+
+filter() 함수는 관찰치들의 값을 기준으로 부분집합을 만들어준다. 함수의 첫번째 인수는 데이터프레임의 이름이고 두번째 이후의 인수들은 데이터를 골라내는 기준이다. 
+
+flights 데이터 중 1월 1일 의 데이타만 골라내려면:
+
+```{r}
+filter(flights, month==1, day==1)
+```
+
+---
+filter() 함수는 filter를 적용하여 새로운 데이터프레임을 만들지만 원본을 바꾸지는 않는다. 따라서 filter를 적용한 새로운 데이터를 jan1이라는 이름으로 저장하려면 할당연산자 `<-` 를 사용하여 저장한다.
+
+tip: `<-`는 alt + `-`  또는 option + `-`로 입력할 수 있다.
+
+```{r}
+jan1 <- filter(flights, month==1, day==1)
+```
+
+이때는 새로운 이름으로 할당이 되지만 인쇄가 되지는 않는다. 
+
+---
+
+할당과 동시에 인쇄를 하려면 할당문 앞뒤를 괄호로 감싸주면 된다. 예를 들어 12월 25일의 비행기록을 dec25에 할당하면서 동시에 저장하려면 다음과 같이 한다.
+
+```{r}
+(dec25 <- filter(flights, month==12, day==25))
+```
+---
+
+#### 비교하기
+
+R에서 사용할 수 있는 비교 연산자는 다음과 같다. `>, >=, <, <=, ==(equal), !=(not equal)`.
+
+처음 R을 배우기 시작할 때 가장 범하기 쉬운 에러는 `==`(equal)대신 `=`(할당연산자)를 사용하는 것이다. 예를 들어 1월의 비행기록을 고르려고 할때 `=`을 사용하게 되면 다음과 같은 에러가 난다.
+
+```{r, error=TRUE}
+filter(flights, month = 1) 
+```
+
+---
+
+또 하나 비교 연산자 `==`를 사용할 때 문제는 [부동소수점(floating point)](https://ko.wikipedia.org/wiki/%EB%B6%80%EB%8F%99%EC%86%8C%EC%88%98%EC%A0%90) 문제이다.  
+
+```{r}
+sqrt(2)^2 == 2
+1/49*49 == 1
+```
+--
+컴퓨터에서 사용하는 숫자는 부동소수점 방식으로 고정 소수점 방식보다 넓은 범위의 수를 나타낼 수 있어 과학기술 계산에 많이 이용되지만, 근삿값으로 표현된다. 따라서 실수끼리 비교할때 `==` 연산자 대신 near ()함수를 쓰면 된다.
+
+```{r}
+ near(sqrt(2)^2,2)
+ near(1/49*49,1)
+```
+---
+
+### 논리 연산자
+
+filter()함수에 비교문을 여러 개 넣으면 `and`로 작동한다. 그 외의 논리 연산자로 `&`는 `and`, `|`는 `or`, 그리고 `!`는 `not`으로 작동한다. 그 외의 불린 연산자는 다음 그림을 참조한다.
+
+![operation](http://r4ds.had.co.nz/diagrams/transform-logical.png)
+
+---
+
+flights 데이터에서 1월과 12월의 비행기록을 찾으려면 다음과 같이 한다.
+
+```{r}
+filter(flights, month == 1 | month == 12)
+```
+
+---
+
+하지만 다음과 같이 쓸 수는 없다.
+```{r,eval=FALSE}
+filter(flights, month == 1 | 12)
+```
+
+이때는 1|12 가 TRUE가 되므로 모든 자료가 된다. 이러한 방법으로 쓸 수 있는 연산자는 `포함(include) 연산자`이며 `x %in% y`와 같이 사용한다. 이 연산자는 x가 y의 값중 하나일때 참이 된다. 따라서 1월, 7월, 12월의 비행기록을 찾으려면 다음과 같이 할 수 있다.
+
+```{r}
+filter(flights, month %in% c(1,7,12))
+```
+
+---
+
+### [드 모르간(De Morgan)의 법칙](https://ko.wikipedia.org/wiki/%EB%93%9C_%EB%AA%A8%EB%A5%B4%EA%B0%84%EC%9D%98_%EB%B2%95%EC%B9%99)
+
+- !(x & y) 는 !x | !y 와 같다.
+
+- !(x | y) 는 !x & !y 와 같다.
+
+(예) 출발 및 도착 지연이 2시간 이내인 모든 비행기록을 찾는다면? 
+
+```{r,eval=FALSE}
+filter(flights, !(arr_delay > 120 | dep_delay > 120))
+filter(flights, arr_delay <= 120, dep_delay <= 120)
+```
+
+---
+
+### 누락된 값(NA)
+
+R의 비교문에서 가장 혼동하기 쉬운 것은 누락치(NA, not available)이다. NA는 전염력이 있다. NA 를 연산하는 경우 모두 NA 가 된다.
+
+```{r}
+NA > 5
+10 == NA
+NA + 10
+NA / 2
+```
+
+---
+
+가장 혼동하기 쉬운 것은 다음 비교이다.
+
+```{r}
+NA == NA
+```
+
+이것을 이해하기 위해서는 다음 예를 보자.
+
+```{r}
+# 철수의 나이를 x라고 하고 나이를 모른다고 하자
+x <- NA
+
+# 영희의 나이를 y라고 하고 나이를 모른다고 하자
+y <- NA
+
+#철수와 영희가 나이가 같은가?
+x == y 
+# 모른다!!
+```
+
+--
+
+철수의 나이가 누락되어 있는가?
+```{r}
+is.na(x)
+```
+
+---
+
+#### filter()와 누락치
+
+filter()는 주어진 조건이 참인 경우만 포함한다. 거짓이거나 누락치인 경우는 제외된다. 
+```{r}
+df <- tibble(x = c(1, NA, 3))
+filter(df, x > 1)
+```
+
+--
+누락치를 포함하려면?
+```{r}
+filter(df, is.na(x) | x > 1)
+```
+
+---
+## Exercises
+
+1.Find all flights that
+
+- Had an arrival delay of two or more hours
+- Flew to Houston(`IAH` or `HOU`)
+- Were operated by United, American, or Delta
+- Departed in summer (July, August, and September)
+- Arrived more than two hours late, but didn’t leave late
+- Were delayed by at least an hour, but made up over 30 minutes in flight
+- Departed between midnight and 6am (inclusive)
+
+2.Another useful dplyr filtering helper is between(). What does it do? Can you use it to simplify the code needed to answer the previous challenges?
+
+
+3.How many flights have a missing dep_time? What other variables are missing? What might these rows represent?
+          
+
+4.Why is `NA ^ 0` not missing? Why is `NA | TRUE` not missing? Why is `FALSE & NA` not missing? Can you figure out the general rule? (`NA * 0` is a tricky counterexample!)
+
+---
+
+## Answers 
+
+1. Find all flights that
+- Had an arrival delay of two or more hours
+
+```{r, eval=FALSE}
+filter(flights,arr_delay >= 120)
+```
+- Flew to Houston(`IAH` or `HOU`)
+
+```{r, eval=FALSE}
+filter(flights, dest %in% c("IAH","HOU"))
+```        
+- Were operated by United, American, or Delta
+```{r, eval=FALSE}
+filter(flights, carrier %in% c("UA","AA","DL"))
+```        
+
+- Departed in summer (July, August, and September)
+
+```{r, eval=FALSE}
+filter(flights, month >= 7, month <= 9)
+```        
+---
+
+- Arrived more than two hours late, but didn’t leave late
+```{r, eval=FALSE}
+filter(flights, arr_delay >= 120, dep_delay<=0 )
+```
+- Were delayed by at least an hour, but made up over 30 minutes in flight
+
+```{r, eval=FALSE}
+filter(flights, arr_delay >= 60, dep_delay - arr_delay >= 30 )
+```
+
+- Departed between midnight and 6am (inclusive)
+```{r, eval=FALSE}
+filter(flights, dep_time >= 0, dep_time <= 600 )
+```
+
+2.Another useful dplyr filtering helper is between(). What does it do? Can you use it to simplify the code needed to answer the previous challenges?
+
+```{r, eval=FALSE}
+filter(flights, dep_time >=0, dep_time<=600)
+filter(flights, between(dep_time ,0, 600)) 
+```
+
+3.How many flights have a missing dep_time? What other variables are missing? What might these rows represent?
+```{r, eval=FALSE}
+filter(flights,is.na(dep_time)) 
+```            
+
+
+---
+
+## 데이터 정렬하기(Arrange rows) `arrange()`
+
+arrange() 함수는 데이타프레임과 열 이름으로 데이타를 정렬한다. 
+
+```{r}
+arrange(flights, year, month, day)
+```
+
+---
+
+desc()을 사용하면 내림차순으로 정렬할 수 있다.
+ 
+```{r}
+arrange(flights, desc(arr_delay))
+```
+ 
+---
+
+누락치(NA)는 가장 마지막에 정렬된다.
+
+```{r}
+df <- tibble(x = c(5, 2, NA))
+arrange(df, x)
+arrange(df, desc(x))
+```
+
+---
+
+### Exercises
+
+1.How could you use arrange() to sort all missing values to the start? (Hint: use is.na()).
+
+2.Sort flights to find the most delayed flights. Find the flights that left earliest.
+
+3.Sort flights to find the fastest flights.
+
+4.Which flights travelled the longest? Which travelled the shortest?
+
+---
+
+### Answers
+
+1.How could you use arrange() to sort all missing values to the start? (Hint: use is.na()).
+```{r}
+arrange(df, !is.na(x),desc(x))
+```
+--- 
+2.Sort flights to find the most delayed flights. Find the flights that left earliest.
+```{r,eval=FALSE}
+arrange(flights, desc(arr_delay))
+```
+---
+3.Sort flights to find the fastest flights.
+```{r,eval=FALSE}
+arrange(flights,desc(distance/air_time))
+top_n(flights,1,distance/air_time)
+```
+
+---
+
+4.Which flights travelled the longest? Which travelled the shortest?
+```{r,eval=FALSE}
+arrange(flights,desc(distance))
+arrange(flights,desc(air_time))
+top_n(flights,1,air_time)
+```
+---
+
+## 원하는 열만 선택 `select()`
+
+데이터의 변수가 수백개 또는 수천개인 경우가 종종 있다. 이런 경우 관심있는 변수들에 국한하여 작업을 진행하는 것이 좋다. select() 함수로 원하는 변수를 선택할 수 있다. 
+```{r}
+
+# 열 이름으로 선택하기
+select(flights, year, month, day)
+```
+---
+```{r}
+# year부터 day 까지 열 선택하기
+select(flights, year:day)
+```
+---
+```{r}
+# year부터 day 까지 열을 제외하고 나머지 열 선택
+select(flights, -(year:day))
+
+```
+
+---
+
+### select() 와 함께 쓸 수 있는 도우미 함수들
+
+- `starts_with("abc")`: “abc”로 시작하는 열이름 선택
+
+- `ends_with("xyz")`: “xyz”으로 끝나는 열이름 선택
+
+- `contains("ijk")`: “ijk”를 포함한 열이름 선택
+
+- `matches()`: 정규표현식을 사용하여 변수이름 선택
+
+- `num_range("x", 1:3)`:  x1, x2 and x3
+
+--
+
+### rename() ; 열이름 바꾸기
+
+```{r,eval=FALSE}
+rename(flights, tail_num = tailnum)
+```
+
+---
+
+### everything()과 함께 select() 사용
+
+데이터 프레임의 변수 순서를 바꿀때 유용
+
+```{r}
+select(flights, time_hour, air_time,everything())
+```
+
+---
+
+### Exercises
+
+1.Brainstorm as many ways as possible to select dep_time, dep_delay, arr_time, and arr_delay from flights.
+
+
+2.What happens if you include the name of a variable multiple times in a select() call?
+
+3.What does the one_of() function do? Why might it be helpful in conjunction with this vector?
+
+```{r, eval=FALSE}
+vars <- c("year", "month", "day", "dep_delay", "arr_delay")
+select(flights, one_of(vars))
+```
+4.Does the result of running the following code surprise you? How do the select helpers deal with case by default? How can you change that default?
+
+```{r, eval=FALSE}
+select(flights, contains("TIME"))
+```
+
+---
+
+## 새로운 변수 추가 `mutate()`
+
+기존의 열에서 새로운 열을 만들 때 `mutate()`함수를 사용할 수 있다.
+
+```{r}
+flights_sml <- select(flights, 
+                      year:day, ends_with("delay"), distance, air_time)
+
+mutate(flights_sml,
+  gain = arr_delay - dep_delay,
+  speed = distance / air_time * 60
+)
+```
+---
+방금 만든 열도 참조하여 새 열을 만들 수 있다.
+
+```{r}
+mutate(flights_sml,
+  gain = arr_delay - dep_delay,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+```
+
+---
+새로 만든 변수만 유지하고 나머지 변수는 없앨 경우 `transmutate()`를 쓴다.
+```{r}
+transmute(flights,
+  gain = arr_delay - dep_delay,
+  hours = air_time / 60,
+  gain_per_hour = gain / hours
+)
+```
+
+---
+
+### mutate()와 함께 사용하는 유용한 함수들
+
+
+
+- 산수 연산자: +, -, \*, / , ^ . 예를 들어 air_time/60, hours\*60 + minute  
+
+- 몫과 나머지: 몫(`%/%`) 연산자, 나머지(`%%`) 연산자
+
+```{r}
+transmute(flights,
+  dep_time,
+  hour = dep_time %/% 100,
+  minute = dep_time %% 100
+)
+```
+
+---
+
+- 로그함수: log(), log2(), log10() 
+
+- 오프셋: leads(), lags()
+
+```{r}
+(x <- 1:10)
+lag(x)
+lead(x)
+```
+---
+lag()함수는 값의 변화를 계산하거나(x-lag(x)) 값이 변화했는지 찾아내는데 유용하다(x!=lag(x))  
+```{r}
+x <- c(1,2,2,3,7,7,8,1)
+x
+lag(x)
+x-lag(x)
+x != lag(x)
+```
+---
+- 누적 총계: cumsum(), cumprod(), cummin(), cummax(), cummean()
+```{r}
+(x <- 1:10)
+cumsum(x)
+cummean(x)
+```
+
+- 논리적 비교:  <, <=, > , >=, ==, !=
+---
+- 순위연산자: min_rank()
+
+```{r}
+y <- c(1,2,2,NA,3,4)
+min_rank(y)
+min_rank(desc(y))
+```
+
+- 그 외 순위연산자
+```{r}
+row_number(y)
+dense_rank(y)
+percent_rank(y)
+cume_dist(y)
+```
+---
+### Exercises
+
+1.Currently `dep_time` and `sched_dep_time` are convenient to look at, but hard to compute with because they’re not really continuous numbers. Convert them to a more convenient representation of number of minutes since midnight.
+
+2.Compare `air_time` with `arr_time - dep_time`. What do you expect to see? What do you see? What do you need to do to fix it?
+
+3.Compare `dep_time`, `sched_dep_time`, and `dep_delay`. How would you expect those three numbers to be related?
+
+4.Find the 10 most delayed flights using a ranking function. How do you want to handle ties? Carefully read the documentation for `min_rank()`.
+
+5.What does `1:3 + 1:10` return? Why?
+
+6.What trigonometric functions does R provide?
+
+---
+### Answers
+
+1.Currently `dep_time` and `sched_dep_time` are convenient to look at, but hard to compute with because they’re not really continuous numbers. Convert them to a more convenient representation of number of minutes since midnight.
+
+```{r}
+flights %>% 
+    select(ends_with("dep_time")) %>% 
+    mutate(
+        dep_min = dep_time %/% 100*60 + dep_time %% 100,
+        sched_dep_min = sched_dep_time %/% 100*60 + sched_dep_time %% 100
+    )
+```
+---
+2.Compare `air_time` with `arr_time - dep_time`. What do you expect to see? What do you see? What do you need to do to fix it?
+
+```{r}
+flights %>% 
+    mutate(time_diff = arr_time - dep_time) %>%
+    select(air_time,arr_time,dep_time,time_diff)
+```
+---
+```{r}
+time2min=function(time){
+    time %/%100*60 + time %%100
+}
+flights %>% 
+    mutate(
+        arr_min=time2min(arr_time),
+        dep_min=time2min(dep_time),
+        timediff=arr_min-dep_min
+    ) %>%
+    select(air_time,arr_time, dep_time, timediff)
+```
+---
+
+3.Compare `dep_time`, `sched_dep_time`, and `dep_delay`. How would you expect those three numbers to be related?
+```{r}
+flights %>%
+    mutate(dep_diff = time2min(dep_time) - time2min(sched_dep_time)) %>%
+    filter(dep_delay!=dep_diff)
+```
+---
+
+4.Find the 10 most delayed flights using a ranking function. How do you want to handle ties? Carefully read the documentation for `min_rank()`.
+```{r}
+flights %>% 
+    mutate(rank=min_rank(desc(arr_delay))) %>%
+    arrange(desc(arr_delay)) %>%
+    filter(rank<=10)
+```
+---
+```{r}
+flights %>% 
+    top_n(10,arr_delay) %>%
+    arrange(desc(arr_delay))
+```
+---
+5.What does `1:3 + 1:10` return? Why?
+```{r}
+1:3 + 1:10
+```
+6.What trigonometric functions does R provide?
+
+---
+
+## 그룹별 요약 `summarise()`
+
+summarise()함수는 데이터프레임을 요약하여 한줄로 만들어준다.
+
+```{r}
+summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
+```
+---
+
+group_by() 함수를 사용하면 데이터프레임 전체가 아니라 그룹별로 나뉜 데이터 그룹별로 함수가 적용된다. 예를 들어 날짜 별로 이륙지연 평균을 구해보면 다음과 같다.
+
+```{r}
+by_day <- group_by(flights, year, month, day)
+summarise(by_day, delay= mean(dep_delay, na.rm = TRUE))
+```
+
+---
+
+### 여러 작업을 하나로 연결하는 pipe
+
+flights 데이터에서 목적지에 따른 비행거리와 도착지연과의 관계를 그림으로 나타내보자.
+
+```{r}
+by_dest <- group_by(flights, dest)
+delay <- summarise(by_dest,
+  count = n(),
+  dist = mean(distance, na.rm = TRUE),
+  delay = mean(arr_delay, na.rm = TRUE)
+)
+delay <- filter(delay, count > 20, dest != "HNL")
+```
+---
+```{r}
+ggplot(data = delay, mapping = aes(x = dist, y = delay)) +
+  geom_point(aes(size = count), alpha = 1/3) +
+  geom_smooth(se = FALSE)
+```
+---
+이 그래프를 얻기 위해 다음과 같은 단계를 거쳤다. 
+
+1.먼저 목적지 별로 그룹으로 나누었다.
+
+2.비행횟수, 도착거리 평균, 도착지연 평균을 계산하였다. 
+
+3.건수가 작은 도착지와 호놀룰루를 제외하였다.
+
+하지만 이 경우 중간단계의 데이터프레임에 일일이 이름을 붙였다. 이 이름은 단지 다음 단계로 넘어가기 위한 이름이고 달리 쓰이는 곳도 없다.
+
+파이프 연산자 %>%를 쓰면 다음과 같다.
+
+```{r}
+delays <- flights %>% 
+  group_by(dest) %>% 
+  summarise(
+    count = n(),
+    dist = mean(distance, na.rm = TRUE),
+    delay = mean(arr_delay, na.rm = TRUE)
+  ) %>% 
+  filter(count > 20, dest != "HNL")
+```
+
+참고) %>% 는 `then`으로 읽는다.
+
+---
+
+### 파이프 연산자
+
+- `x %>% f(y)`  turns into `f(x,y)`
+- `x %>% f(y) %>% g(z)` turns into `g(f(x, y), z)`
+
+Tip) %>% 연산자는 Ctrl+Shift+M 또는 Cmd+Shift+M으로 입력할수 있다.
+---
+
+### 누락치 제거
+
+평균과 같은 집계함수는 누락치가 하나라도 있으면 누락치로 계산된다. 
+
+```{r}
+flights %>% 
+  group_by(year, month, day) %>% 
+  summarise(mean = mean(dep_delay))
+```
+---
+따라서 평균을 계산할때 누락치를 제거하려면 na.rm = TRUE 옵션을 준다.
+```{r}
+flights %>% 
+  group_by(year, month, day) %>% 
+  summarise(mean = mean(dep_delay, na.rm=TRUE)) 
+```
+---
+누락치를 제거한 데이터를 not_cancelled 에 저장한다.
+```{r}
+not_cancelled <- flights %>% 
+  filter(!is.na(dep_delay), !is.na(arr_delay))
+
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(mean = mean(dep_delay))
+```
+---
+
+### Counts
+
+집계를 할때 count(n()) 또는 누락되지 않은 count(sum(!is.na(x))) 를 포함하는 것이 좋다. 결론을 내리기 전에 적은 양의 데이터에 의해 결론이 내려지지 않는지 count를 살펴보아야 한다. 예를 들어 평균 도착지연이 가장 많은 비행기(tail number)가 어떤 것인지 살펴보자.
+
+```{r,fig.height=3,fig.width=5}
+delays <- not_cancelled %>% 
+  group_by(tailnum) %>% 
+  summarise(delay = mean(arr_delay))
+
+ggplot(data = delays, mapping = aes(x = delay)) + 
+  geom_freqpoly()
+```
+
+그림에서 보면 평균 도착지연이 300분이나 되는 비행기도 있다.
+---
+
+비행횟수와 평균도착지연 관계를 산점도로 나타내보면 다음과 같다.
+
+```{r,fig.height=4,fig.width=6}
+delays <- not_cancelled %>% 
+  group_by(tailnum) %>% 
+  summarise(
+    delay=mean(arr_delay, na.rm = TRUE),
+    n = n()
+  )
+ggplot(data = delays, mapping = aes(x = n, y = delay)) + 
+  geom_point(alpha = 1/10)
+```
+
+비행횟수가 적은 경우 도착지연시간의 변동이 크다는 것을 알수 있다.
+
+---
+
+이런 경우 관찰치가 적은 그룹을 필터링해서 걸러내는 것이 유용할 수 있다. 
+```{r,fig.height=5,fig.width=7}
+delays %>% 
+  filter(n > 25) %>% 
+  ggplot(mapping = aes(x = n, y = delay)) + 
+    geom_point(alpha = 1/10)
+```
+
+---
+
+### 타수와 타율의 관계
+
+Lahman패키지의 Batting 데이타를 사용하여 타수와 타율의 관계를 살펴보자. Lahman패키지가 설치되어 있지 않은 경우 설치한다.
+
+```{r,eval=FALSE}
+install.packages("Lahman")
+```
+
+타자의 타율(batting average, ba) 은 안타수를 타수로 나누어 계산한다.
+
+```{r}
+batting <- as_tibble(Lahman::Batting)
+
+batters <- batting %>% 
+  group_by(playerID) %>% 
+  summarise(
+    ba = sum(H, na.rm = TRUE) / sum(AB, na.rm = TRUE),
+    ab = sum(AB, na.rm = TRUE)
+  )
+```
+
+---
+타율이 가장 높은 10명을 보면 다음과 같다.
+```{r}
+batters %>%
+    top_n(10,ba)
+```
+---
+```{r,fig.height=5,fig.width=7}
+batters %>% 
+  ggplot(mapping = aes(x = ab, y = ba)) +
+    geom_point() + 
+    geom_smooth(se = FALSE)
+```
+
+---
+100타수 이상인 타자들에 대해서 산점도를 그려보면 다음과 같다.
+```{r,fig.height=5,fig.width=7}
+batters %>% 
+  filter(ab > 100) %>% 
+  ggplot(mapping = aes(x = ab, y = ba)) +
+    geom_point() + 
+    geom_smooth(se = FALSE)
+```
+---
+### 유용한 집계함수
+
+- 평균, 중앙값: mean(), median()
+
+```{r}
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(
+    avg_delay1 = mean(arr_delay),
+    avg_delay2 = mean(arr_delay[arr_delay > 0]) # the average positive delay
+  )
+```
+---
+- 퍼진 정도: sd(), IQR(), mad()
+```{r}
+not_cancelled %>% 
+  group_by(dest) %>% 
+  summarise(distance_sd = sd(distance)) %>% 
+  arrange(desc(distance_sd))
+```
+---
+- 순위: min(x), quantile(x,0.25), max(x)
+
+- 순서 : first(x), nth(x), last(x)
+
+- Counts : n(), sum(!is.na(x)), n_distinct(x)
+
+```{r}
+# Which destinations have the most carriers?
+not_cancelled %>% 
+  group_by(dest) %>% 
+  summarise(carriers = n_distinct(carrier)) %>% 
+  arrange(desc(carriers))
+```
+---
+- count()
+
+```{r}
+not_cancelled %>% 
+  count(dest)
+```
+---
+- count() for sum
+```{r}
+not_cancelled %>% 
+  count(tailnum, wt = distance)
+```
+---
+- counts for logical values : sum(x>10), mean(x==0)
+
+논리값을 숫자함수로 다룰때 TRUE는 1로 FALSE는 0으로 바뀐다. 따라서 sum(x)는 TRUE의 갯수, mean(x)는 비율이 된다. 예를 들어 날짜별로 새벽 5시 전에 출발한 비행기의 대수와 비율을 보면 다음과 같다.
+
+```{r}
+not_cancelled %>%
+    group_by(year,month,day) %>%
+    summarise(
+        n_early=sum(dep_time<=500),
+        early_perc=mean(dep_time<=500)
+    )
+```
+
+---
+날짜별로 1시간 이상 연착된 비행기의 비율은?
+
+```{r}
+not_cancelled %>%
+    group_by(year,month,day) %>%
+    summarise(
+        hour_perc=mean(arr_delay>60)
+    )
+```
+---
+### Exercises
+
+1.Brainstorm at least 5 different ways to assess the typical delay characteristics of a group of flights. Consider the following scenarios:
+
+- A flight is 15 minutes early 50% of the time, and 15 minutes late 50% of the time.
+
+- A flight is always 10 minutes late.
+
+- A flight is 30 minutes early 50% of the time, and 30 minutes late 50% of the time.
+
+- 99% of the time a flight is on time. 1% of the time it’s 2 hours late.
+
+Which is more important: arrival delay or departure delay?
+
+2.Come up with another approach that will give you the same output as not_cancelled %>% count(dest) and not_cancelled %>% count(tailnum, wt = distance) (without using count()).
+
+3.Our definition of cancelled flights (is.na(dep_delay) | is.na(arr_delay) ) is slightly suboptimal. Why? Which is the most important column?
+
+4.Look at the number of cancelled flights per day. Is there a pattern? Is the proportion of cancelled flights related to the average delay?
+
+5.Which carrier has the worst delays? Challenge: can you disentangle the effects of bad airports vs. bad carriers? Why/why not? (Hint: think about flights %>% group_by(carrier, dest) %>% summarise(n()))
+
+6.What does the sort argument to count() do. When might you use it?
+---
+
+### Grouped filters and mutates 
+
+- Find worst members od each group
+
+```{r}
+flights_sml %>% 
+  group_by(year, month, day) %>%
+  filter(rank(desc(arr_delay)) < 2)
+  #top_n(1,arr_delay)
+```
+- Find popular destination
+
+```{r}
+popular_dest <- flights %>%
+    group_by(dest) %>%
+    filter(n()>365)
+popular_dest
+```
+---
+### Exercises
+
+1.Refer back to the lists of useful mutate and filtering functions. Describe how each operation changes when you combine it with grouping.
+
+2.Which plane (tailnum) has the worst on-time record?
+
+3.What time of day should you fly if you want to avoid delays as much as possible?
+
+4.For each destination, compute the total minutes of delay. For each, flight, compute the proportion of the total delay for its destination.
+
+5.Delays are typically temporally correlated: even once the problem that caused the initial delay has been resolved, later flights are delayed to allow earlier flights to leave. Using lag() explore how the delay of a flight is related to the delay of the immediately preceding flight.
+
+6.Look at each destination. Can you find flights that are suspiciously fast? (i.e. flights that represent a potential data entry error). Compute the air time a flight relative to the shortest flight to that destination. Which flights were most delayed in the air?
+
+7.Find all destinations that are flown by at least two carriers. Use that information to rank the carriers.
+
+8.For each plane, count the number of flights before the first delay of greater than 1 hour.
