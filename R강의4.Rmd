@@ -9,6 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE,comment = NA)
 ```
 
+# 필요한 패키지들
+
+```{r,eval=FALSE}
+install.packages(c("ggplot2","car","gcookbook","lattice"))
+```
 
 # R 그래프를 그릴때 알아야 할 점
 
