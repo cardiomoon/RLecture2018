@@ -1,0 +1,377 @@
+---
+title: "R 강의 6. 상관분석, 회귀분석"
+author: "Keon-Woong Moon"
+date: "June 14, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,comment=NA,message=FALSE)
+```
+
+```
+상관관계라고 하는 것은 두 개의 정량적 변수가 어느 정도 관련이 있는 것인가 하는 것으로 흔히 r값으로 표현된다. 회귀(regression)의 사전적 의미는 "go back to an earlier and worse condition"(옛날 상태로 돌아감)을 의미한다. 이 용어를 사용하게 된 것은 1885년 발표된 영국의 유전학자인 Francis Galton의 연구에 기인한다. 상관분석, 회귀분석을 위해 UsingR 패키지에 들어 있는 galton 데이터를 직접 살펴보기로 한다.
+```
+
+## 평균
+
+1. 어느 반 학생들의 수학점수와 물리점수가 다음과 같았다. 
+
+```{r}
+수학=c(50,60,40,30,70,50)
+물리=c(40,60,40,20,80,50)
+```
+
+수학점수와 물리점수의 평균은? 
+
+```{r}
+mean(수학)
+mean(물리)
+```
+
+x와 y의 (산술)평균 = $\frac{x + y}{2}$ 
+
+2. A 기업의 2년전 매출 성장률이 50%였고 작년의 매출은 4% 감소하였다.  이 기업의 2년간 평균 성장률은?
+
+```{r}
+sqrt(1.5*0.96)
+```
+
+기하평균 = $\sqrt{x\times y}$ 
+
+3. 1km의 거리를 갈때는 시속 60km로 갔다가 올때는 시속 40km로 왔다면 평균 몇 km/hr의 속도로 왕복한 것인가?
+
+```{r}
+2/(1/60+1/40)
+```
+
+조화평균 = $\frac{2}{\frac{1}{x}+\frac{1}{y}}$
+
+
+4. 제곱평균
+
+제곱평균 = $\sqrt{\frac{x^2+y^2}{2}}$
+
+## 편차
+
+편차란 각 데이터가 평균으로부터 얼마나 큰가 또는 작은가를 나타낸다. 예를 들어 수학점수가 다음과 같을 때
+
+```{r}
+수학=c(50,60,40,30,70,50)
+```
+
+평균과 편차는 다음과 같다.
+```{r}
+mean(수학)
+(수학편차=수학-mean(수학))
+```
+
+편차의 평균은?
+```{r}
+mean(수학편차)
+```
+
+## 분산, 표준편차
+
+편차의 평균은 항상 0이 되므로 편차의 평균으로는 데이타의 퍼진 정도를 알 수 없다. 따라서 편차를 제곱하여 더한 후 갯수로 나눈 값을 구하면 퍼진 정도를 알 수 있는데 이를 분산이라고 한다.
+
+```{r}
+sum(수학편차^2)/length(수학편차)
+```
+표준편차 = $\sqrt{분산}$
+
+
+## 표본분산, 표본표준편차 
+
+```{r}
+var(수학)
+sd(수학)
+```
+
+## 표분공분산, 상관계수
+
+```{r}
+(수학-mean(수학))*(물리-mean(물리))
+sum((수학-mean(수학))*(물리-mean(물리)))/5
+cov(수학,물리)
+
+cov(수학,물리)/(sd(수학)*sd(물리))
+cor.test(수학,물리)
+```
+
+
+
+## 상관관계
+
+
+## Galton의 데이터 
+
+먼저 UsingR 패키지를 설치한다. 이미 설치되어 있는 경우는 생략한다. 
+```{r,eval=FALSE}
+install.packages("UsingR")
+```
+
+UsingR 패키지를 불러오고 galton 데이터의 구조를 살펴보자. 
+```{r,message=FALSE}
+require(UsingR)
+data(galton) ; str(galton)
+```
+
+galton 데이터는 928개의 부모의 키와 아이의 키에 대한 자료이다. 이 자료에 포함되어 있는 부모의 키는 아빠의 키와 1.08*엄마의 키의 산술평균이다.
+이 자료들의 분포를 살펴보기 위해 화면을 둘로 나누고 히스토그램을 그려본다.
+```{r,fig.show='hold'}
+par(mfrow=c(1,2))
+hist(galton$child,col="blue",breaks=100)
+hist(galton$parent,col="blue",breaks=100)
+par(mfrow=c(1,1))
+```
+
+
+galton\$child와 galton\$parent 자료의 상관관계는 다음과 같이 구한다. 
+
+```{r}
+cor.test(galton$child,galton$parent)
+```
+
+결과를 보면 상관계수 cor는 0.458이고 p값은 < 2.2e-16으로 되어있다. 이것은 ${2.2}\times10^{-16}$ 이하라는 뜻으로 매우 유의한 상관관계가 있다는 것을 알 수 있다. 
+부모와 아이의 키를 표로 요약해본다. 
+
+```{r}
+xtabs(~child+parent,data=galton)
+```
+
+
+galton은 작성된 표를 통해 부모의 키와 자녀의 키 간에는 직선관계가 있음을 발견하였고 또한 자녀의 키는 평균 키를 중심으로 회귀하려는 경향이 있음을 언급하였다. 부모의 키와 자녀의 키 사이의 수학적 관계를 나타내는 공식은 회귀분석을 통하여 구할 수 있다. R에서 회귀분석은 선형모형(linear model)을 쓴다. lm은 linear model의 약자로 사용법은 다음과 같다.
+
+```
+lm(종속변수(결과) ~ 독립변수(원인),데이터)
+```
+
+즉 부모의 키에 의해 자녀의 키가 결정되므로 이 경우 다음과 같이 회귀공식을 구할 수 있다. 
+
+```{r}
+out=lm(child~parent,data=galton)
+summary(out)
+```
+
+
+
+결과를 보면 y절편(Intercept)이 23.94이고 parent의 기울기는 0.65인 것으로 나타난다. 즉 $y = 0.65x + 23.94$이다. 
+
+이를 그래프로 그려보면 다음과 같다.
+
+```{r}
+plot(child~parent,data=galton)
+abline(out,col="red")
+```
+
+이 그래프는 여러 가지로 개선시킬 점이 많다. ggplot2 패키의 geom_count()를 이용하여 그림을 그려보면 다음과 같다.
+
+
+```{r}
+require(ggplot2)
+ggplot(data=galton,aes(x=parent,y=child))+geom_count()+geom_smooth(method="lm")
+```
+
+## 회귀의 다양한 얼굴 
+
+일반적으로 회귀라고 할 때 보통의 최소제곱(Ordinary Least Square, OLS)에 의한 회귀를 말하지만 그 외에도 수 많은 회귀 방법이 있다. 2005년에 Vito Ricci가 만든 목록을 보면 R에서 사용하는 회귀와 관련된 함수는 모두 205개이다(http://cran.r-project.org/doc/contrib/Ricci-refcard-regression.pdf). 대표적인 것은 다음 표와 같다.
+
+### 회귀의 다양성
+
+
+회귀의 종류 | 전형적인 사용 예
+-----------------|--------------------
+단순선형(Simple linear) | 정량적인 설명변수로부터 정량적인 반응변수 예측 
+다항(Polynomial) | 설명변수와 반응변수의 관계가 다항식인 경우 
+다중선형(Multiple linear) | 두 개 이상의 설명변수로 반응변수의 예측
+다수준(multilevel) | 계통적, 혼합 모형이라고도 함. 계통적 구조를 가지고 있는 변수(예를 들어 학교 내 학급 내 학생들)로부터의 반응의 예측 
+다변량(multivariate) | 하나 이상의 설명변수로부터 하나 이상의 반응변수 예측 
+로지스틱(Logistic) | 하나 이상의 설명변수로부터 범주형 변수의 예측
+포아송(Poisson) | 하나 이상의 설명변수로부터 비율이나 도수로 나타나는 반응변수의 예측
+Cox 비례위험 | 하나 이상의 설명변수로부터 event(사망,실패,재발 등)까지의 시간 예측
+시계열(Time-series) | 시계열 데이터 및 관련 오차 모형
+비선형(non-linear) | 비선형 모형을 이용한 회귀
+비모수(nonparametric) | 정형화되어 있지 않은 데이터로부터 회귀모형
+로버스트(robust) | 영향력 있는 관찰치의 영향에 저항력 있는 회귀 
+
+## 단순 선형회귀
+
+women 데이터는 30세부터 39세까지의 미국 여성 15명의 키와 몸무게 데이터이다. 미국 데이터답게 키는 인치, 몸무게는 파운드로 되어 있다.
+
+```{r}
+women
+```
+
+선형모형을 사용하여 회귀분석을 해보면 다음과 같다. 
+
+```{r}
+fit <- lm(weight~height,data=women)
+summary(fit)
+```
+
+회귀분석 결과 Coefficients: 부분을 살펴보자. y절편(Intercept)은 -87.52, 기울기는 3.45이다. p값은 1.1e-14(즉, $1.1\times10^{-14}$)로 매우 낮다. 즉 몸무게(파운드)와 키(인치)는 다음과 같은 관계가 성립한다. 
+
+> $weight = -87.52 + 3.45\times height$
+
+결과의 마지막 세 줄을 살펴보자. Residual standard error(1.525파운드) 라는 것은 이 모형을 사용하여 키로부터 몸무게를 예측했을 때 평균 1.525 파운드의 오차가 생긴다는 뜻이다. Multiple R-squared가 0.991이라는 것은 이 모형은 몸무게 분산의 99.1%를 설명해준다는 뜻이다. 이것은 상관분석에서 나오는 상관계수 r의 제곱이기도 하다. 다음을 보자.  
+
+```{r}
+cor.test(women$weight,women$height)
+0.9955^2
+```
+
+상관분석 결과 r값은 0.9955이며 이 값의 제곱은 0.991이다.
+
+F-statistic은 예측인자들을 모두 고려하였을 때 우연 이상으로 반응변수를 예측할 수 있는 정도를 나타내는데, 이 경우와 같이 예측인자가 하나인 경우는 키의 회귀계수에 대한 t-test 결과와 같다.   
+
+
+이를 그림으로 그려보면 다음과 같다. 실제 수치와 예측치가 가장 많이 차이를 보이는 경우는 키가 아주 클 때와 아주 작을 때이다. 
+
+```{r}
+plot(weight~height,data=women)
+abline(fit,col="blue")
+```
+
+이 그림을 보면 회귀선이 한 번 구부러지면 훨씬 정확한 예측이 가능할 수 있을 것이라는 생각이 든다. 다항회귀는 한 개의 예측변수와 반응변수의 관계가 n차 다항식일 때, 예를 들어  $y=\beta_{0}+\beta_{1}x+\beta_{2} x^2$와 같은 관계일 때 적용할 수 있다.
+
+
+## 다항회귀(Polynomial regression)
+
+보다 정확한 예측을 위해 이차방정식을 도입하여 회귀분석을 해보자.
+
+```{r}
+fit2=lm(weight~height+I(height^2),data=women)
+summary(fit2)
+```
+
+lm 함수를 호출할 때 I() 함수를 사용하면 괄호 안의 수식을 R의 보통 수식처럼 계산하라는 명령이다. 이차방정식 회귀의 결과를 보면 height 및 $height^2$의 회귀계수가 모두 유의하다. 또한 Multiple R-squared 값이 0.991에서 0.999로 증가하였다. 이 회귀모형에 의하면 몸무게와 키의 관계는 다음과 같다.
+
+> $weight = 261.9 - 7.35\times height + 0.0831\times height^2$
+
+
+이 회귀모형의 예측치를 실제 값과 plot해보면 다음과 같다.
+
+```{r}
+plot(weight~height,data=women)
+lines(women$height,fitted(fit2),col="red")
+```
+
+ggplot2를 이용하여 그려보면 다음과 같다.
+
+```{r}
+require(ggplot2)
+ggplot(data=women,aes(x=height,y=weight))+
+    geom_point()+
+    geom_smooth(method="lm",formula=y~poly(x,2))+
+    theme_bw()
+
+```
+
+일반적으로 **n차 다항식은 n-1개의 bend를 갖는 곡선을 만든다**. 세제곱 다항식을 얻으려면 다음과 같이 하면 된다.
+
+``` {r}
+fit3 <- lm(weight ~ height + I(height^2) +I(height^3), data=women)
+```
+
+```{r}
+require(ggplot2)
+ggplot(data=women,aes(x=height,y=weight))+
+    geom_point()+
+    geom_smooth(method="lm",formula=y~poly(x,3))+
+    theme_bw()
+
+```
+
+보다 고차의 다항식, 예를 들어 4차, 5차의 다항식도 가능하지만 세제곱 이상이 필요한 경우는 거의 없다. 
+
+
+car 패키지의 scatterplot() 함수는 두 개의 변수 간의 관계를 보는 데 매우 유용하다. 다음의 그래프를 보자.
+
+```{r}
+require(car)
+scatterplot(weight~height,data=women)
+
+```
+
+scatterplot() 함수는 scatterplot과 함께 가로, 세로 축의 변수의 boxplot을 그려주고 가장 잘 맞는 직선회귀선과 smooth line(loess회귀선)을 그려준다. 
+
+
+
+spread=FALSE 옵션을 사용하면 spread 및 asymmetry 정보를 억제할 수 있으며 smoother.args=list(lty=2)는 loess 곡선을 점선으로 그리라는 명령이다. xlab 및 ylab 인수는 축 제목을 정해주는 인수이고 main 인수는 그래프의 제목을 정해주는 인수이다. pch=19는 점을 속이 차 있는 circle로 그려준다. 다음 그림을 보자.
+
+```{r}
+scatterplot(weight~height,data=women,pch=19,
+            spread=FALSE,smoother.args=list(lty=2),
+            main="Women Age 30-39",
+            xlab="Height(inches)",ylab="Weight(lbs.)")
+```
+
+이 그림을 보면 직선 모형보다 곡선 모형이 보다 더 잘 맞는 것을 알 수 있다. 
+이 그림을 ggplot2를 이용하여 그려보면 다음과 같다.
+```{r}
+require(ggplot2)
+ggplot(women,aes(x=height,y=weight))+geom_point()+geom_smooth(colour="red")+geom_smooth(method="lm",colour="green",se=FALSE)
+```
+
+## 다중회귀(Multiple linear regression
+
+### 모형선택
+
+다중회귀는 단순회귀분석과 달리 예측변수가 두 개 이상인 경우에 사용한다.
+다중회귀분석에서 예측변수의 수가 많을 경우 모형선택의 과정을 거치는데, 회귀모형에 포함시킬 예측변수들의 선택 기준은 다음과 같다.
+
+* 반응변수(종속변수)와 상관관계가 높아야 한다.
+* 선택된 예측변수(독립변수)들 사이에는 상관관계가 낮아야 한다.
+* 소수 정예의 원칙을 따른다.
+
+두 번째 원칙에 있는 예측변수들 간의 상관관계가 높다는 것은 중복된 정보를 모형에 넣어준다는 뜻이므로 변수의 낭비일 뿐만 아니라 계산상으로도 문제를 일으켜 영향력 있는 예측변수를 의미없게 만들 수도 있다(다중공선성 multicolinearity).
+
+모형선택에는 가능한 모든 예측변수들의 조합들로 모형을 만들어 서로 비교하는 all possible regressions, 가장 유의한 변수부터 덜 유의한 변수 순으로 하나씩 추가시키는 forward selection, 모든 변수를 넣고 가장 기여도가 낮은 변수로부터 하나씩 제거해 나가는 backward elimination 등이 쓰인다. 변수들 간에 상관관계가 어느 정도 있는 경우 forward selection은 중요한 변수라고 할지라도 이 변수가 이미 모형에 포함되어 있는 변수들과 상관관계가 높다면 아예 최종 모형에 체택되지 않을 수도 있기 때문에 변수가 너무 많지 않은 경우 backward elimination을 권장한다. 
+
+### birthwt 데이터
+
+MASS 패키지에 있는 birthwt 데이터는 1986년 미국의 Messachusetts 주 Springfield에 있는 Baystate Medical Center에서 수집한 자료로 189명의 자료이다. 
+
+```{r}
+require(MASS)
+tail(birthwt)
+str(birthwt)
+```
+
+이 자료를 쓸 때 주의할 점은 race 변수는 엄마가 백인(white)인 경우 1, 흑인인 경우 2, 그 외의 경우 3으로 코딩되어 있는 범주형 변수라는 점이다. 그냥 race를 쓸 경우 연속형 변수로 인식하므로 factor(race)로 사용하여야 한다. bwt를 반응변수로 age(엄마의 나이), lwt(마지막 생리기간의 엄마의 몸무게), race(인종), smoke(임신 중 흡연상태), ptl(과거 조산 횟수), ht(고혈압의 기왕력), ui(uterine irritability 존재 여부)를 독립변수로 하여 다중회귀분석을 실시하자.
+
+```{r}
+out=lm(bwt~ age+lwt+factor(race)+smoke+ptl+ht+ui,data=birthwt)
+anova(out)
+```
+
+
+### F-test
+
+분산분석표에서 age와 ptl이 유의하지 않으므로 두 변수를 제거한 모형을 만들고 두 변수의 중요도를 평가하기 위해 F-test를 실시한다. F-test는 두 모형의 설명력을 비교하여 첫 번째 모형에서 제거된 변수들의 기여도를 평가한다고 생각하면 된다. 다음과 같이 시행한다.
+
+```
+anova(작은 모형, 큰 모형)
+```
+
+```{r}
+out2=lm(bwt~ lwt+factor(race)+smoke+ht+ui,data=birthwt)
+anova(out2,out)
+```
+
+F-test 결과 p값이 0.792로 매우 크므로 두 변수를 제거할 수 있다. ptl과 age를 제거한 모형의 분산분석표를 보면 모든 변수가 유의하다.
+
+```{r}
+anova(out2)
+summary(out2)
+```
+
+summary()로 최종모형을 살펴보면 $R^2=0.2404$로 모형이 반응변수의 24.04% 설명한다. 설명력이 너무 작다고 볼 수도 있지만 통제 불가능한 변인들이 많은 연구에서 이정도의 $R^2$는 결코 작다고 할 수 없다. 
+
+
+## 다중회귀모형에서 상호작용의 시각화
+
+http://rpubs.com/cardiomoon/153265
+
+
