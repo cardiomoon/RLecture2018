@@ -403,8 +403,10 @@ xyplot(Sepal.Length~Petal.Length|Species,data=iris)
 ```{r}
 library(ggplot2)
 library(car)
-# 사용하는 데이터 : car::Salaries
 ```
+
+사용하는 데이터  car::Salaries
+
 ```{r,echo=FALSE}
 p <- ggplot(data=Salaries,                                 # 데이타 할당 
             aes(x=yrs.service,y=salary,fill=sex))        # 변수 할당
@@ -425,7 +427,7 @@ ggplot(data=Salaries,aes(x=rank,y=salary,fill=rank))+
 ```
 
 
-사용하는 데이터  car::Salaries
+사용하는 데이터  lattice::singer
 
 ```{r,echo=FALSE}
 ggplot(data=lattice::singer,aes(x=height,fill=voice.part))+ 
@@ -435,7 +437,7 @@ ggplot(data=lattice::singer,aes(x=height,fill=voice.part))+
 ```
 
 
-사용하는 데이터 gccokbook::uspopage
+사용하는 데이터 gcookbook::uspopage
 
 ```{r,echo=FALSE}
 require(gcookbook)
