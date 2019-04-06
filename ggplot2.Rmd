@@ -13,7 +13,8 @@ output:
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
-knitr::opts_chunk$set(comment = NA,fig.height=3, fig.width=5,dpi=300,message=FALSE)
+knitr::opts_chunk$set(comment = NA,fig.height=3, fig.width=5,dpi=300,message=FALSE,
+                      out.width = "90%",fig.align="default")
 ```
 
 

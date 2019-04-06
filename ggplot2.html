@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
   <head>
     <title>R graphics with ggplot2</title>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <meta name="author" content="Keon-Woong Moon" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
@@ -13,7 +13,7 @@ class: center, middle, inverse, title-slide
 
 # R graphics with ggplot2
 ### Keon-Woong Moon
-### 2015/10/14 (updated: 2018-12-25)
+### 2015/10/14 (updated: 2019-04-06)
 
 ---
 
@@ -72,7 +72,7 @@ install.packages(c("ggplot2","car","gcookbook","lattice"))
 ---
 # 예제1
 
-![](ggplot2_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-6-1.png" width="90%" /&gt;
 
 ---
 
@@ -177,7 +177,7 @@ str(Salaries)       # Salaries 데이터의 구조는?
 ggplot(data=Salaries)                           # 데이터 할당
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-8-1.png" width="90%" /&gt;
 ---
 ### 데이터 및 x축 변수 할당
 
@@ -187,7 +187,7 @@ ggplot(data=Salaries,                                # 데이터 할당
             aes(x=yrs.service))                      # 변수 할당
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-9-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-9-1.png" width="90%" /&gt;
 ---
 
 ### 데이터 및 x축, y축변수 할당
@@ -198,7 +198,7 @@ ggplot(data=Salaries,                                # 데이터 할당
             aes(x=yrs.service,y=salary))             # 변수 할당
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-10-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-10-1.png" width="90%" /&gt;
 
 ---
 
@@ -210,7 +210,7 @@ p &lt;- ggplot(data=Salaries,                                # 데이터 할당
 p + geom_point()
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-11-1.png" width="90%" /&gt;
 
 ---
 
@@ -220,7 +220,7 @@ p + geom_point()
 p + geom_point(aes(colour=sex))           # 점그래프의 색에 성별을 할당
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-12-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-12-1.png" width="90%" /&gt;
 
 ---
 
@@ -232,7 +232,7 @@ p + geom_point(aes(colour=sex)) +         # 점그래프의 색에 성별을 할
      geom_smooth()                        # 회귀선 추가
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-13-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-13-1.png" width="90%" /&gt;
 
 ---
 
@@ -245,7 +245,7 @@ p + geom_point(aes(colour=sex)) +         # 점그래프의 색에 성별을 할
      facet_grid(~sex)                     # 면을 수직으로 분할 
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-14-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-14-1.png" width="90%" /&gt;
 
 ---
 
@@ -258,7 +258,7 @@ p + geom_point(pch=21) +                            # 점그래프
      facet_grid(~sex)                               # 면을 수직으로 분할 
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-15-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-15-1.png" width="90%" /&gt;
 
 ---
 
@@ -288,7 +288,7 @@ ggplot(data=mypoints,aes(x=floor(x/7),y=x%%7))+
 
 ### 예제 2 : 대학교수 직급별 연봉분포
 
-![](ggplot2_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-18-1.png" width="90%" /&gt;
 
 ---
 
@@ -300,7 +300,7 @@ p&lt;-ggplot(data=Salaries,aes(x=salary)) # 데이타, 변수 할당
 p+ geom_density()         # density 추가, 투명도 조절 
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-19-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-19-1.png" width="90%" /&gt;
 ---
 
 ### 대학교수의 직급별 연봉분포 
@@ -311,7 +311,7 @@ p&lt;-ggplot(data=Salaries,aes(x=salary,fill=rank)) # 데이타, 변수 할당
 p+ geom_density()         # density 추가, 투명도 조절 
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-20-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-20-1.png" width="90%" /&gt;
 
 ---
 ### 투명도, 선굵기 조절
@@ -322,13 +322,13 @@ ggplot(data=Salaries,aes(x=salary,fill=rank)) + # 데이타, 변수 할당
 geom_density(alpha=0.4,size=0.2)         # density 추가, 투명도 조절 
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-21-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-21-1.png" width="90%" /&gt;
 
 ---
 ### 가수의 키 분포
 
 * 사용데이터 lattice::singer
-![](ggplot2_files/figure-html/unnamed-chunk-22-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-22-1.png" width="90%" /&gt;
 
 ---
 
@@ -355,7 +355,7 @@ ggplot(data=lattice::singer,aes(x=height,fill=voice.part))+
 ### Area Plot
 
 * 사용데이터 gcookbook::uspopage
-![](ggplot2_files/figure-html/unnamed-chunk-25-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-25-1.png" width="90%" /&gt;
 
 ---
 
@@ -367,7 +367,7 @@ ggplot(uspopage,aes(x=Year,y=Thousands,color=AgeGroup))+
      geom_point()
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-26-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-26-1.png" width="90%" /&gt;
 ---
 
 ### 3-2 점그래프 위치변경
@@ -378,7 +378,7 @@ ggplot(uspopage,aes(x=Year,y=Thousands,color=AgeGroup))+
      geom_point(position=position_stack())
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-27-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-27-1.png" width="90%" /&gt;
 
 ---
 ### 3-3 점그래프 + 선그래프
@@ -390,7 +390,7 @@ ggplot(uspopage,aes(x=Year,y=Thousands,color=AgeGroup))+
      geom_line()
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-28-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-28-1.png" width="90%" /&gt;
 
 ---
 ### 3-4 점그래프 + 선그래프 위치변경
@@ -402,7 +402,7 @@ ggplot(uspopage,aes(x=Year,y=Thousands,color=AgeGroup))+
      geom_line(position=position_stack())
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-29-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-29-1.png" width="90%" /&gt;
 
 --- 
 ---
@@ -415,7 +415,7 @@ p &lt;- ggplot(uspopage,aes(x=Year,y=Thousands,fill=AgeGroup))
 p +  geom_area() 
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-30-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-30-1.png" width="90%" /&gt;
 
 ---
 
@@ -426,7 +426,7 @@ p +  geom_area(alpha=0.4) +
      geom_line(position='stack',size=0.2)
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-31-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-31-1.png" width="90%" /&gt;
 
 ---
 
@@ -438,7 +438,7 @@ p +  geom_area(alpha=0.4) +
      scale_fill_brewer(palette="Blues")
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-32-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-32-1.png" width="90%" /&gt;
 
 ---
 .pull-left[
@@ -451,14 +451,14 @@ display.brewer.all()
 ]
 .pull-right[
 
-![](ggplot2_files/figure-html/unnamed-chunk-34-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-34-1.png" width="90%" /&gt;
 ]
 
 ---
 
 ### 예제 4: 직급별 연봉
 
-![](ggplot2_files/figure-html/unnamed-chunk-35-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-35-1.png" width="90%" /&gt;
 ---
 
 
@@ -476,11 +476,11 @@ ggplot(data=Salaries,aes(x=rank,y=salary,fill=rank))+
 ###  예제 5. 막대그래프
 
 .pull-left[
-![](ggplot2_files/figure-html/unnamed-chunk-37-1.png)&lt;!-- --&gt;![](ggplot2_files/figure-html/unnamed-chunk-37-2.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-37-1.png" width="90%" /&gt;&lt;img src="ggplot2_files/figure-html/unnamed-chunk-37-2.png" width="90%" /&gt;
 ]
 
 .pull-right[
-![](ggplot2_files/figure-html/unnamed-chunk-38-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-38-1.png" width="90%" /&gt;
 ]
 ---
 
@@ -496,7 +496,7 @@ ggplot(data=Salaries,
       geom_bar(position="fill")
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-39-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-39-1.png" width="90%" /&gt;
 ]
 
 .pull-right[
@@ -508,14 +508,14 @@ ggplot(data=Salaries,
       geom_bar(position="dodge")
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-40-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-40-1.png" width="90%" /&gt;
 ]
 
 ---
 
 ### 예제 6  클리브랜드 dot plot
 
-![](ggplot2_files/figure-html/unnamed-chunk-41-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-41-1.png" width="90%" /&gt;
 
 ---
 
@@ -565,7 +565,7 @@ ggplot(data=tophit,aes(x=avg,y=name,colour=lg))+
        geom_point()
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-43-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-43-1.png" width="90%" /&gt;
 ---
 
 ### 이름을 성적순으로
@@ -575,7 +575,7 @@ p &lt;- ggplot(data=tophit,aes(x=avg,y=reorder(name,avg),colour=lg))
 p +  geom_point()
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-44-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-44-1.png" width="90%" /&gt;
 
 ---
 ### 산점도+선분추가
@@ -586,7 +586,7 @@ p + geom_point() +
      geom_segment(aes(xend=0.31,yend=name))
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-45-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-45-1.png" width="90%" /&gt;
 ---
 ###  산점도+선분추가+테마 적용
 
@@ -597,7 +597,7 @@ p + geom_point() +
      theme_bw()
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-46-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-46-1.png" width="90%" /&gt;
 
 ---
 
@@ -610,7 +610,7 @@ p + geom_point() +
      facet_grid(lg~.)
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-47-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-47-1.png" width="90%" /&gt;
 
 ---
 ### 면분할 옵션조절
@@ -622,7 +622,7 @@ p + geom_point() +
      facet_grid(lg~.,scales= "free_y",space= "free_y" )
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-48-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-48-1.png" width="90%" /&gt;
 ---
 ### 그래프 가다듬기
 
@@ -634,7 +634,7 @@ p + geom_point() +
      theme(legend.position= "none" )+ ylab("")
 ```
 
-![](ggplot2_files/figure-html/unnamed-chunk-49-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-49-1.png" width="90%" /&gt;
 
 ---
 # R package ggplotAssist
@@ -651,7 +651,7 @@ install.packages("ggplotAssist")
 https://github.com/cardiomoon/ggplotAssist
 ---
 * 데이터 ggplot2::msleep
-![](ggplot2_files/figure-html/unnamed-chunk-51-1.png)&lt;!-- --&gt;
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-51-1.png" width="90%" /&gt;
 
 ---
 
@@ -679,6 +679,7 @@ install.packages("ggiraphExtra")
 https://github.com/cardiomoon/ggiraphExtra
 http://rpubs.com/cardiomoon/231820
     </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
 "highlightStyle": "github",
@@ -688,16 +689,57 @@ http://rpubs.com/cardiomoon/231820
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));
 });
-(function() {
-  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
   if (!r) return;
   s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
   d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
 })();</script>
 
 <script>
 (function() {
-  var i, text, code, codes = document.getElementsByTagName('code');
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
   for (i = 0; i < codes.length;) {
     code = codes[i];
     if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
@@ -711,7 +753,8 @@ if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
     }
     i++;
   }
-})();
+};
+slideshow._releaseMath(document);
 </script>
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
